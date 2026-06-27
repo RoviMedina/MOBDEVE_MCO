@@ -12,40 +12,53 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dashboard"
+            android:text="Receipt Details"
             android:textSize="28sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Total Expenses This Month\n₱4,250.00"
-            android:textSize="20sp"
-            android:padding="16dp"
+            android:layout_height="180dp"
+            android:gravity="center"
+            android:text="Receipt Image Placeholder"
+            android:textSize="18sp"
             android:background="#EEEEEE"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="16dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Receipts Scanned\n12"
-            android:textSize="20sp"
-            android:padding="16dp"
-            android:background="#EEEEEE"
-            android:layout_marginBottom="12dp" />
+            android:text="Store: Jollibee"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/btnScanReceipt"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Scan Receipt"
-            android:layout_marginBottom="20dp" />
+            android:text="Date: June 27, 2026"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category: Food"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Total: ₱250.00"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Recent Receipts"
+            android:text="Items"
             android:textSize="22sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
@@ -53,32 +66,23 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Jollibee - ₱250.00 - Food"
+            android:text="Chickenjoy - ₱120.00\nBurger Steak - ₱100.00\nDrink - ₱30.00"
             android:padding="12dp"
             android:background="#EEEEEE"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="National Bookstore - ₱500.00 - School"
-            android:padding="12dp"
-            android:background="#EEEEEE"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Grab - ₱180.00 - Transportation"
-            android:padding="12dp"
-            android:background="#EEEEEE" />
+            android:layout_marginBottom="20dp" />
 
         <Button
-            android:id="@+id/btnReports"
+            android:id="@+id/btnEditReceipt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="View Reports"
-            android:layout_marginBottom="20dp" />
+            android:text="Edit Receipt"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnDeleteReceipt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete Receipt" />
 
     </LinearLayout>
 </ScrollView>

@@ -16,5 +16,12 @@ class DashboardActivity : AppCompatActivity() {
             val intent = Intent(this, ScanReceiptActivity::class.java)
             startActivity(intent)
         }
+
+        val btnReports = findViewById<Button>(R.id.btnReports)
+
+        btnReports.setOnClickListener {
+            val intent = Intent(this, ReportsActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
