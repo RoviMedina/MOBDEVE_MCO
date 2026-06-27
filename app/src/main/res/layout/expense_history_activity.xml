@@ -1,46 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="20dp">
+    android:background="#F8F9FC">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Expense History"
-            android:textSize="28sp"
+            android:textSize="30sp"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:textColor="#1C1B1F"/>
 
-        <EditText
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View all your saved receipts"
+            android:textColor="#6B7280"
+            android:textSize="15sp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Search -->
+
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Search receipts"
-            android:layout_marginBottom="12dp" />
+            app:boxBackgroundMode="filled"
+            app:boxCornerRadiusTopStart="18dp"
+            app:boxCornerRadiusTopEnd="18dp"
+            app:boxCornerRadiusBottomStart="18dp"
+            app:boxCornerRadiusBottomEnd="18dp">
 
-        <Button
-            android:id="@+id/btnViewReceiptDetails"
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Recent -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recent Receipts"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="#1C1B1F"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Receipt 1 -->
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Jollibee - ₱250.00 - Food"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="14dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp">
 
-        <Button
+            <Button
+                android:id="@+id/btnViewReceiptDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:textAllCaps="false"
+                android:gravity="start|center_vertical"
+                android:text="🍗  Jollibee\nFood • Today\n₱250.00"
+                android:textColor="#1C1B1F"
+                android:textSize="17sp"
+                android:padding="20dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Receipt 2 -->
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="National Bookstore - ₱500.00 - School"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="14dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp">
 
-        <Button
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:textAllCaps="false"
+                android:gravity="start|center_vertical"
+                android:text="📚  National Bookstore\nSchool • Yesterday\n₱500.00"
+                android:textColor="#1C1B1F"
+                android:textSize="17sp"
+                android:padding="20dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Receipt 3 -->
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Grab - ₱180.00 - Transportation"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="14dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:textAllCaps="false"
+                android:gravity="start|center_vertical"
+                android:text="🚕  Grab\nTransportation • June 26\n₱180.00"
+                android:textColor="#1C1B1F"
+                android:textSize="17sp"
+                android:padding="20dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Receipt 4 -->
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:textAllCaps="false"
+                android:gravity="start|center_vertical"
+                android:text="☕  Starbucks\nCoffee • June 25\n₱320.00"
+                android:textColor="#1C1B1F"
+                android:textSize="17sp"
+                android:padding="20dp"/>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
+
 </ScrollView>
