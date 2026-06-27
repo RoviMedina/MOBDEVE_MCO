@@ -23,5 +23,11 @@ class DashboardActivity : AppCompatActivity() {
             val intent = Intent(this, ReportsActivity::class.java)
             startActivity(intent)
         }
+
+        val btnProfile = findViewById<Button>(R.id.btnProfile)
+
+        btnProfile.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
     }
 }

@@ -17,6 +17,7 @@
         <activity android:name=".ExpenseHistoryActivity" />
         <activity android:name=".ReceiptDetailsActivity" />
         <activity android:name=".ReportsActivity" />
+        <activity android:name=".ProfileActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

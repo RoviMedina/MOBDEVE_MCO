@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Profile"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Name: John Doe"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Email: johndoe@email.com"
+            android:textSize="18sp"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/btnManageCategories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manage Categories"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnCurrency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Currency Settings"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnAbout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="About"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Logout"/>
+
+    </LinearLayout>
+
+</ScrollView>
