@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MOBDEVE_MCO</string>
+    <string name="edit_receipt">Edit Receipt</string>
+    <string name="delete_receipt">Delete Receipt</string>
 </resources>

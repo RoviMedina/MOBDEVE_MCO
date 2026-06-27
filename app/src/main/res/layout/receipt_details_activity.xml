@@ -75,14 +75,14 @@
             android:id="@+id/btnEditReceipt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Edit Receipt"
+            android:text="@string/edit_receipt"
             android:layout_marginBottom="8dp" />
 
         <Button
             android:id="@+id/btnDeleteReceipt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Delete Receipt" />
+            android:text="@string/delete_receipt" />
 
     </LinearLayout>
 </ScrollView>
