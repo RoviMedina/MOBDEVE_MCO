@@ -5,15 +5,15 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 
-class ScanReceiptActivity : AppCompatActivity() {
+class ReviewReceiptActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.scan_receipt_activity)
+        setContentView(R.layout.review_receipt_activity)
 
-        val btnCaptureReceipt = findViewById<Button>(R.id.btnCaptureReceipt)
+        val btnSaveReceipt = findViewById<Button>(R.id.btnSaveReceipt)
 
-        btnCaptureReceipt.setOnClickListener {
-            val intent = Intent(this, ReviewReceiptActivity::class.java)
+        btnSaveReceipt.setOnClickListener {
+            val intent = Intent(this, ExpenseHistoryActivity::class.java)
             startActivity(intent)
         }
     }
