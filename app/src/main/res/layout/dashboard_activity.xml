@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dashboard"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Total Expenses This Month\n₱4,250.00"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Receipts Scanned\n12"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnScanReceipt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan Receipt"
+            android:layout_marginBottom="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recent Receipts"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jollibee - ₱250.00 - Food"
+            android:padding="12dp"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="National Bookstore - ₱500.00 - School"
+            android:padding="12dp"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Grab - ₱180.00 - Transportation"
+            android:padding="12dp"
+            android:background="#EEEEEE" />
+
+    </LinearLayout>
+</ScrollView>

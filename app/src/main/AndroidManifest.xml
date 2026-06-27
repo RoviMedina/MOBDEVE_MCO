@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MOBDEVE_MCO">
         <activity android:name=".DashboardActivity" />
+        <activity android:name=".ScanReceiptActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
