@@ -25,15 +25,17 @@
 
     <Button
         android:id="@+id/btnCaptureReceipt"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="Capture Receipt"
-        android:layout_marginBottom="8dp" />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:text="Capture Receipt" />
 
     <Button
         android:id="@+id/btnUploadReceipt"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:text="Upload from Gallery" />
 
 </LinearLayout>
