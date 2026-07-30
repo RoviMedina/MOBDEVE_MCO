@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FC">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,27 +11,24 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Header -->
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Profile"
+            android:textColor="@color/textPrimary"
             android:textSize="30sp"
-            android:textStyle="bold"
-            android:textColor="#1C1B1F"/>
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Manage your account settings"
-            android:textColor="#6B7280"
-            android:textSize="15sp"
             android:layout_marginTop="6dp"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="24dp"
+            android:text="Manage your account settings"
+            android:textColor="@color/textSecondary"
+            android:textSize="15sp" />
 
-        <!-- Profile Card -->
-
+        <!-- TODO: Replace sample profile with logged-in user data. -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,51 +38,46 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:gravity="center"
+                android:orientation="vertical"
                 android:padding="24dp">
 
                 <ImageView
                     android:layout_width="90dp"
                     android:layout_height="90dp"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    android:tint="#6750A4"/>
+                    android:tint="@color/primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:text="John Doe"
+                    android:textColor="@color/textPrimary"
                     android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:textColor="#1C1B1F"
-                    android:layout_marginTop="16dp"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
                     android:text="johndoe@email.com"
-                    android:textColor="#6B7280"
-                    android:textSize="15sp"
-                    android:layout_marginTop="6dp"/>
-
+                    android:textColor="@color/textSecondary"
+                    android:textSize="15sp" />
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Settings -->
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#1C1B1F"
             android:layout_marginTop="30dp"
-            android:layout_marginBottom="14dp"/>
+            android:layout_marginBottom="14dp"
+            android:text="Settings"
+            android:textColor="@color/textPrimary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-        <!-- Manage Categories -->
-
+        <!-- TODO: Build these settings as separate screens or dialogs. -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -99,16 +90,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:text="📂  Manage Categories"
-                android:textAllCaps="false"
-                android:textColor="#1C1B1F"
-                android:textSize="17sp"
                 android:gravity="start|center_vertical"
-                android:padding="20dp"/>
-
+                android:padding="20dp"
+                android:text="Manage Categories"
+                android:textAllCaps="false"
+                android:textColor="@color/textPrimary"
+                android:textSize="17sp" />
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Currency -->
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -122,16 +110,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:text="💵  Currency Settings"
-                android:textAllCaps="false"
-                android:textColor="#1C1B1F"
-                android:textSize="17sp"
                 android:gravity="start|center_vertical"
-                android:padding="20dp"/>
-
+                android:padding="20dp"
+                android:text="Currency Settings"
+                android:textAllCaps="false"
+                android:textColor="@color/textPrimary"
+                android:textSize="17sp" />
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- About -->
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -145,16 +130,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:text="ℹ️  About"
-                android:textAllCaps="false"
-                android:textColor="#1C1B1F"
-                android:textSize="17sp"
                 android:gravity="start|center_vertical"
-                android:padding="20dp"/>
-
+                android:padding="20dp"
+                android:text="About"
+                android:textAllCaps="false"
+                android:textColor="@color/textPrimary"
+                android:textSize="17sp" />
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Logout -->
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
@@ -164,9 +146,7 @@
             android:text="Log Out"
             android:textAllCaps="false"
             android:textSize="16sp"
-            app:cornerRadius="18dp"
-            app:backgroundTint="#E53935"/>
-
+            app:backgroundTint="@color/danger"
+            app:cornerRadius="18dp" />
     </LinearLayout>
-
 </ScrollView>

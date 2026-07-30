@@ -11,10 +11,15 @@ class DashboardActivity : AppCompatActivity() {
         setContentView(R.layout.dashboard_activity)
 
         val btnScanReceipt = findViewById<Button>(R.id.btnScanReceipt)
+        val btnExpenseHistory = findViewById<Button>(R.id.btnExpenseHistory)
 
         btnScanReceipt.setOnClickListener {
             val intent = Intent(this, ScanReceiptActivity::class.java)
             startActivity(intent)
+        }
+
+        btnExpenseHistory.setOnClickListener {
+            startActivity(Intent(this, ExpenseHistoryActivity::class.java))
         }
 
         val btnReports = findViewById<Button>(R.id.btnReports)

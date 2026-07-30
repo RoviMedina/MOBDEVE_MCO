@@ -7,5 +7,6 @@ class ReportsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.reports_activity)
+        // TODO: Replace mock report values with SQLite queries and chart library rendering.
     }
 }

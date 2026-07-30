@@ -13,6 +13,7 @@ class ReviewReceiptActivity : AppCompatActivity() {
         val btnSaveReceipt = findViewById<Button>(R.id.btnSaveReceipt)
 
         btnSaveReceipt.setOnClickListener {
+            // TODO: Save edited receipt fields to SQLite before opening history.
             val intent = Intent(this, ExpenseHistoryActivity::class.java)
             startActivity(intent)
         }
