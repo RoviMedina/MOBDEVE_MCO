@@ -114,8 +114,8 @@ class ReviewReceiptActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                Toast.makeText(this, "Receipt saved.", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, ExpenseHistoryActivity::class.java))
+                val intent = Intent(this, ReceiptSavedActivity::class.java)
+                startActivity(intent)
                 finish()
             }
         }

@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- TODO: Create RegisterActivity.kt, add it to AndroidManifest.xml, and open it from MainActivity. -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,12 +28,16 @@
             android:textColor="@color/textSecondary"
             android:textSize="15sp" />
 
-        <!-- TODO: Add validation for required fields, valid email format, and matching passwords. -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRegisterName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Full Name"
-            app:boxBackgroundMode="filled">
+            app:boxBackgroundMode="filled"
+            app:boxCornerRadiusBottomEnd="18dp"
+            app:boxCornerRadiusBottomStart="18dp"
+            app:boxCornerRadiusTopEnd="18dp"
+            app:boxCornerRadiusTopStart="18dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etRegisterName"
@@ -44,11 +47,16 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRegisterEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             android:hint="Email"
-            app:boxBackgroundMode="filled">
+            app:boxBackgroundMode="filled"
+            app:boxCornerRadiusBottomEnd="18dp"
+            app:boxCornerRadiusBottomStart="18dp"
+            app:boxCornerRadiusTopEnd="18dp"
+            app:boxCornerRadiusTopStart="18dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etRegisterEmail"
@@ -58,15 +66,40 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRegisterPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             android:hint="Password"
             app:boxBackgroundMode="filled"
+            app:boxCornerRadiusBottomEnd="18dp"
+            app:boxCornerRadiusBottomStart="18dp"
+            app:boxCornerRadiusTopEnd="18dp"
+            app:boxCornerRadiusTopStart="18dp"
             app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etRegisterPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRegisterConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:hint="Confirm Password"
+            app:boxBackgroundMode="filled"
+            app:boxCornerRadiusBottomEnd="18dp"
+            app:boxCornerRadiusBottomStart="18dp"
+            app:boxCornerRadiusTopEnd="18dp"
+            app:boxCornerRadiusTopStart="18dp"
+            app:endIconMode="password_toggle">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRegisterConfirmPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
@@ -81,6 +114,16 @@
             android:textAllCaps="false"
             app:cornerRadius="18dp" />
 
-        <!-- TODO: Save new account locally or connect this form to the chosen auth implementation. -->
+        <Button
+            android:id="@+id/btnBackToLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="14dp"
+            android:background="@android:color/transparent"
+            android:text="Back to Login"
+            android:textAllCaps="false"
+            android:textColor="@color/primary"
+            android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>

@@ -8,7 +8,6 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- TODO: Create ReceiptSavedActivity.kt or use this as a success state after database save. -->
     <TextView
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -37,7 +36,6 @@
         android:textColor="@color/textSecondary"
         android:textSize="15sp" />
 
-    <!-- TODO: Wire these buttons to ExpenseHistoryActivity and ScanReceiptActivity. -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnViewSavedReceipt"
         android:layout_width="match_parent"

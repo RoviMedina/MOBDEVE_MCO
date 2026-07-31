@@ -1,12 +1,15 @@
 package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import android.view.View
 import java.util.Locale
 
 class ReceiptDetailsActivity : AppCompatActivity() {
@@ -57,8 +60,27 @@ class ReceiptDetailsActivity : AppCompatActivity() {
             String.format(Locale.US, "Total: PHP %.2f", receipt.totalAmount)
         findViewById<TextView>(R.id.tvReceiptItems).text = receipt.items
 
-        if (!receipt.imageUri.isNullOrBlank()) {
-            findViewById<TextView>(R.id.tvReceiptImagePlaceholder).text = "Receipt image saved from scan/gallery"
+        loadReceiptImage(receipt.imageUri)
+    }
+
+    private fun loadReceiptImage(imageUri: String?) {
+        val ivReceiptImage = findViewById<ImageView>(R.id.ivReceiptImage)
+        val tvReceiptImagePlaceholder = findViewById<TextView>(R.id.tvReceiptImagePlaceholder)
+
+        if (imageUri.isNullOrBlank()) {
+            ivReceiptImage.visibility = View.GONE
+            tvReceiptImagePlaceholder.visibility = View.VISIBLE
+            return
+        }
+
+        try {
+            ivReceiptImage.setImageURI(Uri.parse(imageUri))
+            ivReceiptImage.visibility = View.VISIBLE
+            tvReceiptImagePlaceholder.visibility = View.GONE
+        } catch (exception: Exception) {
+            ivReceiptImage.visibility = View.GONE
+            tvReceiptImagePlaceholder.visibility = View.VISIBLE
+            tvReceiptImagePlaceholder.text = "Could not load receipt image"
         }
     }
 

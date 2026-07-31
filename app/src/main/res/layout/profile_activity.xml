@@ -55,7 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="John Doe"
+                    android:text="Guest User"
                     android:textColor="@color/textPrimary"
                     android:textSize="24sp"
                     android:textStyle="bold" />
@@ -65,7 +65,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="johndoe@email.com"
+                    android:text="No email saved"
                     android:textColor="@color/textSecondary"
                     android:textSize="15sp" />
 
@@ -91,7 +91,6 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <!-- TODO: Build these settings as separate screens or dialogs. -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

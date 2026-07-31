@@ -6,7 +6,6 @@
     android:orientation="horizontal"
     android:padding="16dp">
 
-    <!-- TODO: Use this row in ManageCategoriesActivity with edit/delete actions. -->
     <TextView
         android:id="@+id/tvCategoryColor"
         android:layout_width="24dp"
@@ -29,4 +28,12 @@
         android:layout_height="wrap_content"
         android:text="Edit"
         android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnDeleteCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:textAllCaps="false"
+        android:textColor="@color/danger" />
 </LinearLayout>
