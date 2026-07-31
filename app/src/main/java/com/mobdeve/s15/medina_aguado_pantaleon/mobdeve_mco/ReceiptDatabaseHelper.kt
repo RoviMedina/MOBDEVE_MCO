@@ -119,6 +119,36 @@ class ReceiptDatabaseHelper(context: Context) :
         }
     }
 
+    fun getTotalExpenses(): Double {
+        val cursor = readableDatabase.rawQuery(
+            "SELECT SUM($COL_TOTAL_AMOUNT) FROM $TABLE_RECEIPTS",
+            null
+        )
+
+        cursor.use {
+            return if (it.moveToFirst()) {
+                it.getDouble(0)
+            } else {
+                0.0
+            }
+        }
+    }
+
+    fun getReceiptCount(): Int {
+        val cursor = readableDatabase.rawQuery(
+            "SELECT COUNT(*) FROM $TABLE_RECEIPTS",
+            null
+        )
+
+        cursor.use {
+            return if (it.moveToFirst()) {
+                it.getInt(0)
+            } else {
+                0
+            }
+        }
+    }
+
     private fun queryReceipts(selection: String?, selectionArgs: Array<String>?): List<Receipt> {
         val receipts = mutableListOf<Receipt>()
         readableDatabase.query(

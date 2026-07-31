@@ -50,19 +50,21 @@
                     android:textSize="16sp" />
 
                 <TextView
+                    android:id="@+id/tvTotalExpenses"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="&#8369;4,250.00"
+                    android:text="₱0.00"
                     android:textColor="@android:color/white"
                     android:textSize="34sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvReceiptCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="12 Receipts This Month"
+                    android:text="0 Receipts This Month"
                     android:textColor="@android:color/white"
                     android:textSize="15sp" />
             </LinearLayout>
