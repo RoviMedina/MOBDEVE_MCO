@@ -25,6 +25,9 @@
         <activity android:name=".ReportsActivity" />
         <activity android:name=".ProfileActivity" />
         <activity
+            android:name=".CurrencySettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

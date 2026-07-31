@@ -17,7 +17,10 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnCurrency).setOnClickListener {
-            Toast.makeText(this, "TODO: Add currency preference picker.", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(this, CurrencySettingsActivity::class.java)
+            startActivity(intent)
+
         }
 
         findViewById<Button>(R.id.btnAbout).setOnClickListener {
