@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- TODO: Inflate this from ReviewReceiptActivity to add or edit a receipt item. -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

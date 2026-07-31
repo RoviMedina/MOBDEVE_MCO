@@ -62,15 +62,23 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
-        <!-- TODO: Make receipt line items editable with add/remove controls. -->
-        <TextView
-            android:id="@+id/tvReceiptItems"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvReceiptItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="12dp"
             android:background="#EEEEEE"
-            android:padding="12dp"
-            android:text="Chickenjoy - &#8369;120.00\nBurger Steak - &#8369;100.00\nDrink - &#8369;30.00" />
+            android:minHeight="96dp"
+            android:padding="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddReceiptItem"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="20dp"
+            android:text="Add Item"
+            android:textAllCaps="false" />
 
         <TextView
             android:id="@+id/tvOcrRawText"

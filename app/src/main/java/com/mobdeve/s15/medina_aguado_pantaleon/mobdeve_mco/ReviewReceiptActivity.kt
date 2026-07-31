@@ -6,10 +6,16 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputEditText
+import java.util.Locale
 
 class ReviewReceiptActivity : AppCompatActivity() {
     private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
+    private lateinit var lineItemAdapter: ReceiptLineItemAdapter
     private var editingReceiptId: Long = -1L
     private var existingImageUri: String? = null
 
@@ -24,22 +30,37 @@ class ReviewReceiptActivity : AppCompatActivity() {
         val etReceiptDate = findViewById<EditText>(R.id.etReceiptDate)
         val etTotalAmount = findViewById<EditText>(R.id.etTotalAmount)
         val etCategory = findViewById<EditText>(R.id.etCategory)
-        val tvReceiptItems = findViewById<TextView>(R.id.tvReceiptItems)
         val tvOcrRawText = findViewById<TextView>(R.id.tvOcrRawText)
 
         val existingReceipt = receiptDatabaseHelper.getReceiptById(editingReceiptId)
         existingImageUri = existingReceipt?.imageUri
+        val initialItemText = intent.getStringExtra(EXTRA_ITEMS)
+            ?: existingReceipt?.items
+            ?: "Chickenjoy - PHP 120.00\nBurger Steak - PHP 100.00\nDrink - PHP 30.00"
 
         etStoreName.setText(intent.getStringExtra(EXTRA_STORE_NAME) ?: existingReceipt?.storeName ?: "Jollibee")
         etReceiptDate.setText(intent.getStringExtra(EXTRA_RECEIPT_DATE) ?: existingReceipt?.receiptDate ?: "June 27, 2026")
         etTotalAmount.setText(intent.getStringExtra(EXTRA_TOTAL_AMOUNT) ?: existingReceipt?.totalAmount?.toString() ?: "250.00")
         etCategory.setText(intent.getStringExtra(EXTRA_CATEGORY) ?: existingReceipt?.category ?: "Food")
-        tvReceiptItems.text = intent.getStringExtra(EXTRA_ITEMS)
-            ?: existingReceipt?.items
-            ?: "Chickenjoy - PHP 120.00\nBurger Steak - PHP 100.00\nDrink - PHP 30.00"
         tvOcrRawText.text = intent.getStringExtra(EXTRA_RAW_TEXT)?.ifBlank { "No OCR text detected." }
             ?: existingReceipt?.rawText
             ?: "OCR raw text will appear here after scanning."
+
+        lineItemAdapter = ReceiptLineItemAdapter(
+            parseLineItems(initialItemText).toMutableList(),
+            onEditClick = { position -> showLineItemDialog(position) },
+            onDeleteClick = { position -> lineItemAdapter.deleteItem(position) }
+        )
+
+        findViewById<RecyclerView>(R.id.rvReceiptItems).apply {
+            layoutManager = LinearLayoutManager(this@ReviewReceiptActivity)
+            adapter = lineItemAdapter
+            isNestedScrollingEnabled = false
+        }
+
+        findViewById<Button>(R.id.btnAddReceiptItem).setOnClickListener {
+            showLineItemDialog()
+        }
 
         val btnSaveReceipt = findViewById<Button>(R.id.btnSaveReceipt)
         btnSaveReceipt.text = if (isEditMode()) "Update Receipt" else "Save Receipt"
@@ -49,7 +70,7 @@ class ReviewReceiptActivity : AppCompatActivity() {
             val receiptDate = etReceiptDate.text.toString().ifBlank { "Date not detected" }
             val category = etCategory.text.toString().ifBlank { "Uncategorized" }
             val totalAmount = etTotalAmount.text.toString().toDoubleOrNull() ?: 0.0
-            val items = tvReceiptItems.text.toString()
+            val items = formatLineItemsForStorage()
             val rawText = tvOcrRawText.text.toString()
             val imageUri = intent.getStringExtra(EXTRA_IMAGE_URI) ?: existingImageUri
 
@@ -104,6 +125,64 @@ class ReviewReceiptActivity : AppCompatActivity() {
         return editingReceiptId != -1L
     }
 
+    private fun showLineItemDialog(position: Int? = null) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_line_item, null)
+        val etLineItemName = dialogView.findViewById<TextInputEditText>(R.id.etLineItemName)
+        val etLineItemAmount = dialogView.findViewById<TextInputEditText>(R.id.etLineItemAmount)
+        val existingItem = position?.let { lineItemAdapter.currentItems().getOrNull(it) }
+
+        etLineItemName.setText(existingItem?.name.orEmpty())
+        etLineItemAmount.setText(existingItem?.amount?.takeIf { it > 0.0 }?.toString().orEmpty())
+
+        AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton(if (position == null) "Add" else "Update") { _, _ ->
+                val name = etLineItemName.text?.toString()?.trim().orEmpty()
+                val amount = etLineItemAmount.text?.toString()?.toDoubleOrNull() ?: 0.0
+
+                if (name.isBlank()) {
+                    Toast.makeText(this, "Item name is required.", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val item = ReceiptLineItem(name, amount)
+                if (position == null) {
+                    lineItemAdapter.addItem(item)
+                } else {
+                    lineItemAdapter.updateItem(position, item)
+                }
+            }
+            .show()
+    }
+
+    private fun parseLineItems(itemsText: String): List<ReceiptLineItem> {
+        return itemsText.lines()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .map { line ->
+                val amountMatch = amountPattern.findAll(line).lastOrNull()
+                val amount = amountMatch?.value
+                    ?.replace(",", "")
+                    ?.replace("PHP", "", ignoreCase = true)
+                    ?.replace("P", "", ignoreCase = true)
+                    ?.trim()
+                    ?.toDoubleOrNull()
+                    ?: 0.0
+                val name = amountMatch?.let { line.removeRange(it.range).trim(' ', '-', ':') }
+                    ?.ifBlank { line }
+                    ?: line
+                ReceiptLineItem(name, amount)
+            }
+    }
+
+    private fun formatLineItemsForStorage(): String {
+        return lineItemAdapter.currentItems()
+            .joinToString("\n") { item ->
+                String.format(Locale.US, "%s - PHP %.2f", item.name, item.amount)
+            }
+    }
+
     companion object {
         const val EXTRA_RECEIPT_ID = "extra_receipt_id"
         const val EXTRA_STORE_NAME = "extra_store_name"
@@ -113,5 +192,6 @@ class ReviewReceiptActivity : AppCompatActivity() {
         const val EXTRA_ITEMS = "extra_items"
         const val EXTRA_RAW_TEXT = "extra_raw_text"
         const val EXTRA_IMAGE_URI = "extra_image_uri"
+        private val amountPattern = Regex("""(?:PHP|P)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})""")
     }
 }

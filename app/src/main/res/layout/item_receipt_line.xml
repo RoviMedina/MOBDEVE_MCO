@@ -6,7 +6,6 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <!-- TODO: Use this row for editable receipt line items in ReviewReceiptActivity. -->
     <TextView
         android:id="@+id/tvLineItemName"
         android:layout_width="0dp"
@@ -24,4 +23,20 @@
         android:textColor="@color/textPrimary"
         android:textSize="16sp"
         android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnEditLineItem"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="Edit"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnDeleteLineItem"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Delete"
+        android:textAllCaps="false" />
 </LinearLayout>
