@@ -64,6 +64,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="240dp"
                     android:layout_marginTop="12dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvReportCategories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:nestedScrollingEnabled="false" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

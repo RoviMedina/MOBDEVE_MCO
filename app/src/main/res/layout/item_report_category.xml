@@ -7,7 +7,6 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <!-- TODO: Bind category totals under the Reports chart. -->
     <TextView
         android:id="@+id/tvReportCategory"
         android:layout_width="0dp"

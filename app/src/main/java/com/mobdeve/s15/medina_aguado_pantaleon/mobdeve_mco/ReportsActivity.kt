@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.XAxis
@@ -31,6 +33,7 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var barMonthlySpending: BarChart
     private lateinit var tvMonthlyTotal: TextView
     private lateinit var tvHighestCategory: TextView
+    private lateinit var reportCategoryAdapter: ReportCategoryAdapter
 
     private var receipts: List<Receipt> = emptyList()
     private var monthOptions: List<MonthOption> = emptyList()
@@ -46,6 +49,13 @@ class ReportsActivity : AppCompatActivity() {
         barMonthlySpending = findViewById(R.id.barMonthlySpending)
         tvMonthlyTotal = findViewById(R.id.tvMonthlyTotal)
         tvHighestCategory = findViewById(R.id.tvHighestCategory)
+        reportCategoryAdapter = ReportCategoryAdapter()
+
+        findViewById<RecyclerView>(R.id.rvReportCategories).apply {
+            layoutManager = LinearLayoutManager(this@ReportsActivity)
+            adapter = reportCategoryAdapter
+            isNestedScrollingEnabled = false
+        }
 
         loadReportData()
     }
@@ -126,6 +136,7 @@ class ReportsActivity : AppCompatActivity() {
 
         setupPieChart(categoryTotals, selectedMonthLabel)
         setupBarChart(dateTotals)
+        reportCategoryAdapter.submitList(categoryTotals, totalExpenses)
     }
 
     private fun setupPieChart(categoryTotals: List<Pair<String, Double>>, selectedMonthLabel: String) {
