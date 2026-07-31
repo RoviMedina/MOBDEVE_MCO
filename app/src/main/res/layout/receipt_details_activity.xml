@@ -20,18 +20,31 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <!-- TODO: Display the captured receipt image once camera/gallery support is implemented. -->
-        <TextView
-            android:id="@+id/tvReceiptImagePlaceholder"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="198dp"
-            android:layout_marginBottom="16dp"
-            android:background="#EEEEEE"
-            android:gravity="center"
-            android:text="Receipt Image Placeholder"
-            android:textSize="18sp" />
+            android:layout_marginBottom="16dp">
 
-        <!-- Receipt details are loaded from SQLite using the selected receipt id. -->
+            <ImageView
+                android:id="@+id/ivReceiptImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#EEEEEE"
+                android:contentDescription="Receipt image"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvReceiptImagePlaceholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#EEEEEE"
+                android:gravity="center"
+                android:text="No receipt image saved"
+                android:textColor="@color/textSecondary"
+                android:textSize="18sp" />
+        </FrameLayout>
+
         <TextView
             android:id="@+id/tvStoreName"
             android:layout_width="match_parent"
