@@ -97,6 +97,27 @@ class ReceiptDatabaseHelper(context: Context) :
         return queryReceipts(null, null)
     }
 
+    fun getRecentReceipts(limit: Int): List<Receipt> {
+        val receipts = mutableListOf<Receipt>()
+
+        readableDatabase.query(
+            TABLE_RECEIPTS,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "$COL_CREATED_AT DESC",
+            limit.toString()
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                receipts.add(cursor.toReceipt())
+            }
+        }
+
+        return receipts
+    }
+
     fun searchReceipts(searchText: String): List<Receipt> {
         val query = "%${searchText.trim()}%"
         return queryReceipts(

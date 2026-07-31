@@ -6,6 +6,9 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.TextView
 import java.util.Locale
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class DashboardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,6 +19,7 @@ class DashboardActivity : AppCompatActivity() {
 
         val tvTotalExpenses = findViewById<TextView>(R.id.tvTotalExpenses)
         val tvReceiptCount = findViewById<TextView>(R.id.tvReceiptCount)
+        val tvEmptyRecentReceipts = findViewById<TextView>(R.id.tvEmptyRecentReceipts)
 
         val totalExpenses = dbHelper.getTotalExpenses()
         val receiptCount = dbHelper.getReceiptCount()
@@ -27,6 +31,24 @@ class DashboardActivity : AppCompatActivity() {
         )
 
         tvReceiptCount.text = "$receiptCount Receipts This Month"
+
+        val receiptAdapter = ReceiptAdapter(emptyList()) { receipt ->
+            val intent = Intent(this, ReceiptDetailsActivity::class.java).apply {
+                putExtra(ReceiptDetailsActivity.EXTRA_RECEIPT_ID, receipt.id)
+            }
+            startActivity(intent)
+        }
+
+        findViewById<RecyclerView>(R.id.rvRecentReceipts).apply {
+            layoutManager = LinearLayoutManager(this@DashboardActivity)
+            adapter = receiptAdapter
+        }
+
+        val recentReceipts = dbHelper.getRecentReceipts(3)
+        receiptAdapter.submitList(recentReceipts)
+
+        tvEmptyRecentReceipts.visibility =
+            if (recentReceipts.isEmpty()) View.VISIBLE else View.GONE
 
         val btnScanReceipt = findViewById<Button>(R.id.btnScanReceipt)
         val btnExpenseHistory = findViewById<Button>(R.id.btnExpenseHistory)
