@@ -23,6 +23,13 @@ class ProfileActivity : AppCompatActivity() {
 
         }
 
+        findViewById<Button>(R.id.btnBudget).setOnClickListener {
+
+            val intent = Intent(this, BudgetSettingsActivity::class.java)
+            startActivity(intent)
+
+        }
+
         findViewById<Button>(R.id.btnAbout).setOnClickListener {
 
             val dialogView = layoutInflater.inflate(R.layout.dialog_about, null)
