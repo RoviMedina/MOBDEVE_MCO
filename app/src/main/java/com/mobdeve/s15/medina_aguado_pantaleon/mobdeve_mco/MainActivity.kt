@@ -3,6 +3,7 @@ package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -15,6 +16,11 @@ import com.google.android.material.textfield.TextInputEditText
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (hasActiveSession()) {
+            openDashboard()
+            return
+        }
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -36,8 +42,7 @@ class MainActivity : AppCompatActivity() {
         val email = findViewById<TextInputEditText>(R.id.etEmail).text.toString().trim()
         val password = findViewById<TextInputEditText>(R.id.etPassword).text.toString()
 
-        if (email.isBlank() || password.isBlank()) {
-            Toast.makeText(this, "Enter your email and password.", Toast.LENGTH_SHORT).show()
+        if (!isLoginInputValid(email, password)) {
             return
         }
 
@@ -45,15 +50,47 @@ class MainActivity : AppCompatActivity() {
         val savedEmail = prefs.getString("email", null)
         val savedPassword = prefs.getString("password", null)
 
-        if (email == savedEmail && password == savedPassword) {
-            prefs.edit()
-                .putBoolean("is_logged_in", true)
-                .apply()
-
-            val intent = Intent(this, DashboardActivity::class.java)
-            startActivity(intent)
-        } else {
-            Toast.makeText(this, "Invalid email or password.", Toast.LENGTH_SHORT).show()
+        if (savedEmail.isNullOrBlank() || savedPassword.isNullOrBlank()) {
+            Toast.makeText(this, "No account found. Please register first.", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        if (email != savedEmail || password != savedPassword) {
+            Toast.makeText(this, "Invalid email or password.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        prefs.edit()
+            .putBoolean("is_logged_in", true)
+            .apply()
+
+        openDashboard()
+    }
+
+    private fun isLoginInputValid(email: String, password: String): Boolean {
+        if (email.isBlank() || password.isBlank()) {
+            Toast.makeText(this, "Enter your email and password.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Enter a valid email address.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        return true
+    }
+
+    private fun hasActiveSession(): Boolean {
+        val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("is_logged_in", false)
+        val savedEmail = prefs.getString("email", null)
+        return isLoggedIn && !savedEmail.isNullOrBlank()
+    }
+
+    private fun openDashboard() {
+        val intent = Intent(this, DashboardActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 }
