@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.recyclerview)
     implementation(libs.mlkit.text.recognition)
+    implementation(libs.mpandroidchart)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

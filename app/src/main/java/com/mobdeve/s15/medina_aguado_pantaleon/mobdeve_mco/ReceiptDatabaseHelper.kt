@@ -136,7 +136,8 @@ class ReceiptDatabaseHelper(context: Context) :
             totalAmount = getDouble(getColumnIndexOrThrow(COL_TOTAL_AMOUNT)),
             items = getString(getColumnIndexOrThrow(COL_ITEMS)),
             rawText = getString(getColumnIndexOrThrow(COL_RAW_TEXT)),
-            imageUri = getString(getColumnIndexOrThrow(COL_IMAGE_URI))
+            imageUri = getString(getColumnIndexOrThrow(COL_IMAGE_URI)),
+            createdAt = getLong(getColumnIndexOrThrow(COL_CREATED_AT))
         )
     }
 

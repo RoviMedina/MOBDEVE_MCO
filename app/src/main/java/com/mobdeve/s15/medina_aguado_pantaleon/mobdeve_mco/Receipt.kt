@@ -8,5 +8,6 @@ data class Receipt(
     val totalAmount: Double,
     val items: String,
     val rawText: String,
-    val imageUri: String?
+    val imageUri: String?,
+    val createdAt: Long
 )
