@@ -22,6 +22,7 @@
 
         <!-- TODO: Display the captured receipt image once camera/gallery support is implemented. -->
         <TextView
+            android:id="@+id/tvReceiptImagePlaceholder"
             android:layout_width="match_parent"
             android:layout_height="198dp"
             android:layout_marginBottom="16dp"
@@ -30,8 +31,9 @@
             android:text="Receipt Image Placeholder"
             android:textSize="18sp" />
 
-        <!-- TODO: Load the selected receipt details by receipt id instead of hardcoded sample data. -->
+        <!-- Receipt details are loaded from SQLite using the selected receipt id. -->
         <TextView
+            android:id="@+id/tvStoreName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -39,6 +41,7 @@
             android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/tvReceiptDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -46,6 +49,7 @@
             android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/tvReceiptCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -53,6 +57,7 @@
             android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/tvReceiptTotal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -69,6 +74,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvReceiptItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"

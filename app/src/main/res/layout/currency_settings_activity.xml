@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- TODO: Create CurrencySettingsActivity.kt, add it to AndroidManifest.xml, and open it from ProfileActivity. -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,7 +28,6 @@
             android:textColor="@color/textSecondary"
             android:textSize="15sp" />
 
-        <!-- TODO: Persist the selected currency and update all formatted totals. -->
         <RadioButton
             android:id="@+id/rbPeso"
             android:layout_width="match_parent"

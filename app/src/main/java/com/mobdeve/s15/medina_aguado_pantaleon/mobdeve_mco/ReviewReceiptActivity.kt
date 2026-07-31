@@ -5,38 +5,65 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class ReviewReceiptActivity : AppCompatActivity() {
+    private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.review_receipt_activity)
 
-        findViewById<EditText>(R.id.etStoreName).setText(
+        receiptDatabaseHelper = ReceiptDatabaseHelper(this)
+
+        val etStoreName = findViewById<EditText>(R.id.etStoreName)
+        val etReceiptDate = findViewById<EditText>(R.id.etReceiptDate)
+        val etTotalAmount = findViewById<EditText>(R.id.etTotalAmount)
+        val etCategory = findViewById<EditText>(R.id.etCategory)
+        val tvReceiptItems = findViewById<TextView>(R.id.tvReceiptItems)
+        val tvOcrRawText = findViewById<TextView>(R.id.tvOcrRawText)
+
+        etStoreName.setText(
             intent.getStringExtra(EXTRA_STORE_NAME) ?: "Jollibee"
         )
-        findViewById<EditText>(R.id.etReceiptDate).setText(
+        etReceiptDate.setText(
             intent.getStringExtra(EXTRA_RECEIPT_DATE) ?: "June 27, 2026"
         )
-        findViewById<EditText>(R.id.etTotalAmount).setText(
+        etTotalAmount.setText(
             intent.getStringExtra(EXTRA_TOTAL_AMOUNT) ?: "250.00"
         )
-        findViewById<EditText>(R.id.etCategory).setText(
+        etCategory.setText(
             intent.getStringExtra(EXTRA_CATEGORY) ?: "Food"
         )
-        findViewById<TextView>(R.id.tvReceiptItems).text =
+        tvReceiptItems.text =
             intent.getStringExtra(EXTRA_ITEMS)
                 ?: "Chickenjoy - PHP 120.00\nBurger Steak - PHP 100.00\nDrink - PHP 30.00"
-        findViewById<TextView>(R.id.tvOcrRawText).text =
+        tvOcrRawText.text =
             intent.getStringExtra(EXTRA_RAW_TEXT)?.ifBlank { "No OCR text detected." }
                 ?: "OCR raw text will appear here after scanning."
 
         val btnSaveReceipt = findViewById<Button>(R.id.btnSaveReceipt)
 
         btnSaveReceipt.setOnClickListener {
-            // TODO: Save edited receipt fields to SQLite before opening history.
-            val intent = Intent(this, ExpenseHistoryActivity::class.java)
-            startActivity(intent)
+            val receiptId = receiptDatabaseHelper.insertReceipt(
+                storeName = etStoreName.text.toString().ifBlank { "Unknown Store" },
+                receiptDate = etReceiptDate.text.toString().ifBlank { "Date not detected" },
+                category = etCategory.text.toString().ifBlank { "Uncategorized" },
+                totalAmount = etTotalAmount.text.toString().toDoubleOrNull() ?: 0.0,
+                items = tvReceiptItems.text.toString(),
+                rawText = tvOcrRawText.text.toString(),
+                imageUri = intent.getStringExtra(EXTRA_IMAGE_URI)
+            )
+
+            if (receiptId == -1L) {
+                Toast.makeText(this, "Could not save receipt.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            Toast.makeText(this, "Receipt saved.", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, ExpenseHistoryActivity::class.java))
+            finish()
         }
     }
 
