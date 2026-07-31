@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import java.util.Locale
 
 class ReceiptLineItemAdapter(
     private val items: MutableList<ReceiptLineItem>,
@@ -53,7 +52,7 @@ class ReceiptLineItemAdapter(
 
         fun bind(item: ReceiptLineItem, position: Int) {
             tvLineItemName.text = item.name
-            tvLineItemAmount.text = String.format(Locale.US, "PHP %.2f", item.amount)
+            tvLineItemAmount.text = MoneyFormatter.format(itemView.context, item.amount)
             btnEditLineItem.setOnClickListener { onEditClick(position) }
             btnDeleteLineItem.setOnClickListener { onDeleteClick(position) }
         }

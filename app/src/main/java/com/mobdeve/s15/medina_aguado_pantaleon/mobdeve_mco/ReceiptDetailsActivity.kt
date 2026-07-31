@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
-import java.util.Locale
 
 class ReceiptDetailsActivity : AppCompatActivity() {
     private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
@@ -56,8 +55,7 @@ class ReceiptDetailsActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvStoreName).text = "Store: ${receipt.storeName}"
         findViewById<TextView>(R.id.tvReceiptDate).text = "Date: ${receipt.receiptDate}"
         findViewById<TextView>(R.id.tvReceiptCategory).text = "Category: ${receipt.category}"
-        findViewById<TextView>(R.id.tvReceiptTotal).text =
-            String.format(Locale.US, "Total: PHP %.2f", receipt.totalAmount)
+        findViewById<TextView>(R.id.tvReceiptTotal).text = "Total: ${MoneyFormatter.format(this, receipt.totalAmount)}"
         findViewById<TextView>(R.id.tvReceiptItems).text = receipt.items
 
         loadReceiptImage(receipt.imageUri)

@@ -1,12 +1,14 @@
 package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
 import android.graphics.Color
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +35,8 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var barMonthlySpending: BarChart
     private lateinit var tvMonthlyTotal: TextView
     private lateinit var tvHighestCategory: TextView
+    private lateinit var tvReportBudgetProgress: TextView
+    private lateinit var progressReportBudget: ProgressBar
     private lateinit var reportCategoryAdapter: ReportCategoryAdapter
 
     private var receipts: List<Receipt> = emptyList()
@@ -49,6 +53,8 @@ class ReportsActivity : AppCompatActivity() {
         barMonthlySpending = findViewById(R.id.barMonthlySpending)
         tvMonthlyTotal = findViewById(R.id.tvMonthlyTotal)
         tvHighestCategory = findViewById(R.id.tvHighestCategory)
+        tvReportBudgetProgress = findViewById(R.id.tvReportBudgetProgress)
+        progressReportBudget = findViewById(R.id.progressReportBudget)
         reportCategoryAdapter = ReportCategoryAdapter()
 
         findViewById<RecyclerView>(R.id.rvReportCategories).apply {
@@ -126,13 +132,19 @@ class ReportsActivity : AppCompatActivity() {
             .toList()
             .sortedBy { it.first }
 
-        tvMonthlyTotal.text = String.format(Locale.US, "Total for %s\nPHP %.2f", selectedMonthLabel, totalExpenses)
+        val monthlyBudget = getMonthlyBudget()
+        val budgetPercent = budgetPercent(totalExpenses, monthlyBudget)
+
+        tvMonthlyTotal.text = "Total for $selectedMonthLabel\n${MoneyFormatter.format(this, totalExpenses)}"
         tvHighestCategory.text = if (categoryTotals.isEmpty()) {
             "Highest Category\nNone"
         } else {
             val highestCategory = categoryTotals.first()
-            String.format(Locale.US, "Highest Category\n%s - PHP %.2f", highestCategory.first, highestCategory.second)
+            "Highest Category\n${highestCategory.first} - ${MoneyFormatter.format(this, highestCategory.second)}"
         }
+        progressReportBudget.progress = budgetPercent
+        tvReportBudgetProgress.text =
+            "Budget Progress\n$budgetPercent% of ${MoneyFormatter.format(this, monthlyBudget)}"
 
         setupPieChart(categoryTotals, selectedMonthLabel)
         setupBarChart(dateTotals)
@@ -272,6 +284,23 @@ class ReportsActivity : AppCompatActivity() {
         return runCatching {
             monthDayFormat.parse("$receiptDate $currentYear")
         }.getOrNull()
+    }
+
+    private fun getMonthlyBudget(): Double {
+        return getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getString("monthly_budget", "5000.00")
+            ?.toDoubleOrNull()
+            ?: 5000.00
+    }
+
+    private fun budgetPercent(totalExpenses: Double, monthlyBudget: Double): Int {
+        if (monthlyBudget <= 0.0) {
+            return 0
+        }
+
+        return ((totalExpenses / monthlyBudget) * 100)
+            .toInt()
+            .coerceIn(0, 100)
     }
 
     private data class MonthOption(

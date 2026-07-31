@@ -81,7 +81,7 @@
             android:layout_marginBottom="12dp"
             android:background="#EEEEEE"
             android:padding="16dp"
-            android:text="Total for Selected Month\nPHP 0.00"
+            android:text="Total for Selected Month\n0.00"
             android:textSize="20sp" />
 
         <TextView
@@ -93,6 +93,27 @@
             android:padding="16dp"
             android:text="Highest Category\nNone"
             android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvReportBudgetProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="#EEEEEE"
+            android:padding="16dp"
+            android:text="Budget Progress\n0% of 0.00"
+            android:textSize="20sp" />
+
+        <ProgressBar
+            android:id="@+id/progressReportBudget"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:layout_marginBottom="16dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="@color/primary"
+            android:progressBackgroundTint="@color/primaryContainer" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"

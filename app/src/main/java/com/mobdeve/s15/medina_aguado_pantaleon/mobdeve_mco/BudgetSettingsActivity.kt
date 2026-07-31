@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import android.widget.TextView
 
 class BudgetSettingsActivity : AppCompatActivity() {
 
@@ -14,9 +16,13 @@ class BudgetSettingsActivity : AppCompatActivity() {
         setContentView(R.layout.budget_settings_activity)
 
         val etMonthlyBudget = findViewById<TextInputEditText>(R.id.etMonthlyBudget)
+        val tilMonthlyBudget = findViewById<TextInputLayout>(R.id.tilMonthlyBudget)
+        val tvBudgetExamples = findViewById<TextView>(R.id.tvBudgetExamples)
         val btnSaveBudget = findViewById<MaterialButton>(R.id.btnSaveBudget)
 
         val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        tilMonthlyBudget.prefixText = MoneyFormatter.prefix(this)
+        tvBudgetExamples.text = buildBudgetExampleText()
 
         etMonthlyBudget.setText(
             prefs.getString("monthly_budget", "5000.00")
@@ -37,6 +43,17 @@ class BudgetSettingsActivity : AppCompatActivity() {
             ).show()
 
             finish()
+        }
+    }
+
+    private fun buildBudgetExampleText(): String {
+        return listOf(
+            "Food" to 2000.0,
+            "Transportation" to 1000.0,
+            "School" to 1500.0,
+            "Coffee" to 500.0
+        ).joinToString("\n") { (category, amount) ->
+            "$category: ${MoneyFormatter.format(this, amount)}"
         }
     }
 }

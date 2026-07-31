@@ -47,7 +47,7 @@ class ReportCategoryAdapter :
 
             tvReportCategory.text = categoryTotal.first
             tvReportPercent.text = String.format(Locale.US, "%.0f%%", percent)
-            tvReportAmount.text = String.format(Locale.US, "PHP %.2f", categoryTotal.second)
+            tvReportAmount.text = MoneyFormatter.format(itemView.context, categoryTotal.second)
         }
     }
 }

@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import java.util.Locale
 
 class ReviewReceiptActivity : AppCompatActivity() {
     private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
@@ -130,6 +129,7 @@ class ReviewReceiptActivity : AppCompatActivity() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_line_item, null)
         val tilLineItemName = dialogView.findViewById<TextInputLayout>(R.id.tilLineItemName)
         val tilLineItemAmount = dialogView.findViewById<TextInputLayout>(R.id.tilLineItemAmount)
+        tilLineItemAmount.prefixText = MoneyFormatter.prefix(this)
         val etLineItemName = dialogView.findViewById<TextInputEditText>(R.id.etLineItemName)
         val etLineItemAmount = dialogView.findViewById<TextInputEditText>(R.id.etLineItemAmount)
         val existingItem = position?.let { lineItemAdapter.currentItems().getOrNull(it) }
@@ -189,6 +189,9 @@ class ReviewReceiptActivity : AppCompatActivity() {
                 val amount = amountMatch?.value
                     ?.replace(",", "")
                     ?.replace("PHP", "", ignoreCase = true)
+                    ?.replace("EUR", "", ignoreCase = true)
+                    ?.replace("USD", "", ignoreCase = true)
+                    ?.replace("$", "")
                     ?.replace("P", "", ignoreCase = true)
                     ?.trim()
                     ?.toDoubleOrNull()
@@ -203,7 +206,7 @@ class ReviewReceiptActivity : AppCompatActivity() {
     private fun formatLineItemsForStorage(): String {
         return lineItemAdapter.currentItems()
             .joinToString("\n") { item ->
-                String.format(Locale.US, "%s - PHP %.2f", item.name, item.amount)
+                "${item.name} - ${MoneyFormatter.format(this, item.amount)}"
             }
     }
 
@@ -216,6 +219,6 @@ class ReviewReceiptActivity : AppCompatActivity() {
         const val EXTRA_ITEMS = "extra_items"
         const val EXTRA_RAW_TEXT = "extra_raw_text"
         const val EXTRA_IMAGE_URI = "extra_image_uri"
-        private val amountPattern = Regex("""(?:PHP|P)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})""")
+        private val amountPattern = Regex("""(?:PHP|USD|EUR|P|\$)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})""")
     }
 }
