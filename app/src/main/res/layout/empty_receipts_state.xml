@@ -7,7 +7,6 @@
     android:orientation="vertical"
     android:padding="32dp">
 
-    <!-- TODO: Include this in Expense History when SQLite returns no receipts. -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.util.Locale
 
 class ReviewReceiptActivity : AppCompatActivity() {
@@ -127,6 +128,8 @@ class ReviewReceiptActivity : AppCompatActivity() {
 
     private fun showLineItemDialog(position: Int? = null) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_line_item, null)
+        val tilLineItemName = dialogView.findViewById<TextInputLayout>(R.id.tilLineItemName)
+        val tilLineItemAmount = dialogView.findViewById<TextInputLayout>(R.id.tilLineItemAmount)
         val etLineItemName = dialogView.findViewById<TextInputEditText>(R.id.etLineItemName)
         val etLineItemAmount = dialogView.findViewById<TextInputEditText>(R.id.etLineItemAmount)
         val existingItem = position?.let { lineItemAdapter.currentItems().getOrNull(it) }
@@ -134,16 +137,34 @@ class ReviewReceiptActivity : AppCompatActivity() {
         etLineItemName.setText(existingItem?.name.orEmpty())
         etLineItemAmount.setText(existingItem?.amount?.takeIf { it > 0.0 }?.toString().orEmpty())
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .setNegativeButton("Cancel", null)
-            .setPositiveButton(if (position == null) "Add" else "Update") { _, _ ->
+            .setPositiveButton(if (position == null) "Add" else "Update", null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                tilLineItemName.error = null
+                tilLineItemAmount.error = null
+
                 val name = etLineItemName.text?.toString()?.trim().orEmpty()
-                val amount = etLineItemAmount.text?.toString()?.toDoubleOrNull() ?: 0.0
+                val amountText = etLineItemAmount.text?.toString()?.trim().orEmpty()
+                val amount = amountText.toDoubleOrNull()
 
                 if (name.isBlank()) {
-                    Toast.makeText(this, "Item name is required.", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    tilLineItemName.error = "Item name is required"
+                    return@setOnClickListener
+                }
+
+                if (amountText.isBlank()) {
+                    tilLineItemAmount.error = "Amount is required"
+                    return@setOnClickListener
+                }
+
+                if (amount == null || amount < 0.0) {
+                    tilLineItemAmount.error = "Enter a valid amount"
+                    return@setOnClickListener
                 }
 
                 val item = ReceiptLineItem(name, amount)
@@ -152,8 +173,11 @@ class ReviewReceiptActivity : AppCompatActivity() {
                 } else {
                     lineItemAdapter.updateItem(position, item)
                 }
+                dialog.dismiss()
             }
-            .show()
+        }
+
+        dialog.show()
     }
 
     private fun parseLineItems(itemsText: String): List<ReceiptLineItem> {
