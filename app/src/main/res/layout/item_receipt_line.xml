@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:id="@+id/tvLineItemName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Chickenjoy"
+        android:textColor="@color/textPrimary"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tvLineItemAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#8369;120.00"
+        android:textColor="@color/textPrimary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnEditLineItem"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="Edit"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnDeleteLineItem"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Delete"
+        android:textAllCaps="false" />
+</LinearLayout>

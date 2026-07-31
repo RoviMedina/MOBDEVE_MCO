@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:padding="20dp">
 
     <LinearLayout
@@ -13,12 +14,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Receipt Details"
+            android:textColor="@color/textPrimary"
             android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:textStyle="bold" />
 
+        <!-- TODO: Display the captured receipt image once camera/gallery support is implemented. -->
         <TextView
+            android:id="@+id/tvReceiptImagePlaceholder"
             android:layout_width="match_parent"
             android:layout_height="198dp"
             android:layout_marginBottom="16dp"
@@ -27,50 +31,56 @@
             android:text="Receipt Image Placeholder"
             android:textSize="18sp" />
 
+        <!-- Receipt details are loaded from SQLite using the selected receipt id. -->
         <TextView
+            android:id="@+id/tvStoreName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Store: Jollibee"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
+            android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/tvReceiptDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Date: June 27, 2026"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
+            android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/tvReceiptCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Category: Food"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
+            android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/tvReceiptTotal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Total: ₱250.00"
+            android:layout_marginBottom="16dp"
+            android:text="Total: &#8369;250.00"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Items"
             android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvReceiptItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chickenjoy - ₱120.00\nBurger Steak - ₱100.00\nDrink - ₱30.00"
-            android:padding="12dp"
+            android:layout_marginBottom="20dp"
             android:background="#EEEEEE"
-            android:layout_marginBottom="20dp" />
+            android:padding="12dp"
+            android:text="Chickenjoy - &#8369;120.00\nBurger Steak - &#8369;100.00\nDrink - &#8369;30.00" />
 
         <Button
             android:id="@+id/btnEditReceipt"
@@ -88,10 +98,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/delete_receipt"
-            android:textColor="#FF0000"
-            app:strokeColor="#FF0000"
+            android:textColor="@color/danger"
             app:backgroundTint="@color/white"
-            app:cornerRadius="16dp" />
-
+            app:cornerRadius="16dp"
+            app:strokeColor="@color/danger" />
     </LinearLayout>
 </ScrollView>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="16dp">
+
+    <!-- TODO: Use this row in ManageCategoriesActivity with edit/delete actions. -->
+    <TextView
+        android:id="@+id/tvCategoryColor"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@color/primary" />
+
+    <TextView
+        android:id="@+id/tvCategoryName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_weight="1"
+        android:text="Food"
+        android:textColor="@color/textPrimary"
+        android:textSize="17sp" />
+
+    <Button
+        android:id="@+id/btnEditCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit"
+        android:textAllCaps="false" />
+</LinearLayout>

@@ -1,55 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/scanReceiptRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="24dp">
+
+    <!-- TODO: Create ReceiptSavedActivity.kt or use this as a success state after database save. -->
+    <TextView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@color/success"
+        android:gravity="center"
+        android:text="OK"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Scan Receipt"
+        android:layout_marginTop="24dp"
+        android:text="Receipt Saved"
         android:textColor="@color/textPrimary"
         android:textSize="28sp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/tvScanStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Place the receipt inside the frame, then capture or upload an image."
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Your expense has been added to history."
         android:textColor="@color/textSecondary"
         android:textSize="15sp" />
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/previewView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginBottom="20dp"
-        android:layout_weight="1"
-        android:background="#EEEEEE"
-        app:scaleType="fitCenter" />
-
+    <!-- TODO: Wire these buttons to ExpenseHistoryActivity and ScanReceiptActivity. -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCaptureReceipt"
+        android:id="@+id/btnViewSavedReceipt"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginBottom="10dp"
-        android:text="Capture Receipt"
+        android:layout_marginTop="32dp"
+        android:text="View in History"
         android:textAllCaps="false"
         app:cornerRadius="18dp" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnUploadReceipt"
+        android:id="@+id/btnScanAnotherReceipt"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="Upload from Gallery"
+        android:layout_marginTop="12dp"
+        android:text="Scan Another"
         android:textAllCaps="false"
         app:cornerRadius="18dp" />
 </LinearLayout>

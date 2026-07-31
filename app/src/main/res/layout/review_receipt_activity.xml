@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:padding="20dp">
 
     <LinearLayout
@@ -12,59 +13,82 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Review Receipt"
+            android:textColor="@color/textPrimary"
             android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:textStyle="bold" />
 
+        <!-- OCR prefills these fields. Users can still correct imperfect scan results before saving. -->
         <EditText
             android:id="@+id/etStoreName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             android:hint="Store Name"
-            android:text="Jollibee"
-            android:layout_marginBottom="12dp" />
+            android:text="Jollibee" />
 
         <EditText
             android:id="@+id/etReceiptDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             android:hint="Date"
-            android:text="June 27, 2026"
-            android:layout_marginBottom="12dp" />
+            android:text="June 27, 2026" />
 
         <EditText
             android:id="@+id/etTotalAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             android:hint="Total Amount"
-            android:text="₱250.00"
             android:inputType="numberDecimal"
-            android:layout_marginBottom="12dp" />
+            android:text="250.00" />
 
         <EditText
             android:id="@+id/etCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             android:hint="Category"
-            android:text="Food"
-            android:layout_marginBottom="20dp" />
+            android:text="Food" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Items"
+            android:textColor="@color/textPrimary"
             android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:textStyle="bold" />
 
-        <TextView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvReceiptItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chickenjoy - ₱120.00\nBurger Steak - ₱100.00\nDrink - ₱30.00"
-            android:padding="12dp"
+            android:layout_marginBottom="12dp"
             android:background="#EEEEEE"
-            android:layout_marginBottom="20dp" />
+            android:minHeight="96dp"
+            android:padding="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddReceiptItem"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="20dp"
+            android:text="Add Item"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:id="@+id/tvOcrRawText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="#EEEEEE"
+            android:padding="12dp"
+            android:text="OCR raw text will appear here after scanning."
+            android:textColor="@color/textSecondary" />
 
         <Button
             android:id="@+id/btnSaveReceipt"
@@ -72,6 +96,5 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Save Receipt" />
-
     </LinearLayout>
 </ScrollView>
