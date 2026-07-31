@@ -1,7 +1,5 @@
 package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
-import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -13,6 +11,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
 class ManageCategoriesActivity : AppCompatActivity() {
+    private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
     private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var etNewCategory: TextInputEditText
     private lateinit var tilNewCategory: TextInputLayout
@@ -22,11 +21,13 @@ class ManageCategoriesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.manage_categories_activity)
 
+        receiptDatabaseHelper = ReceiptDatabaseHelper(this)
         etNewCategory = findViewById(R.id.etNewCategory)
         tilNewCategory = findViewById(R.id.tilNewCategory)
 
         categoryAdapter = CategoryAdapter(
             categories,
+            onColorClick = { position -> changeCategoryColor(position) },
             onEditClick = { position -> showRenameDialog(position) },
             onDeleteClick = { position -> confirmDelete(position) }
         )
@@ -58,9 +59,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
             return
         }
 
-        categories.add(Category(name, categoryColors[categories.size % categoryColors.size]))
-        saveCategories()
-        categoryAdapter.replaceItems(categories)
+        val color = ReceiptDatabaseHelper.categoryColors[categories.size % ReceiptDatabaseHelper.categoryColors.size]
+        receiptDatabaseHelper.insertCategory(name, color)
+        loadCategories()
         etNewCategory.text?.clear()
     }
 
@@ -91,11 +92,17 @@ class ManageCategoriesActivity : AppCompatActivity() {
                     return@setPositiveButton
                 }
 
-                categories[position] = category.copy(name = newName)
-                saveCategories()
-                categoryAdapter.replaceItems(categories)
+                receiptDatabaseHelper.updateCategory(category.id, newName, category.color)
+                loadCategories()
             }
             .show()
+    }
+
+    private fun changeCategoryColor(position: Int) {
+        val category = categories.getOrNull(position) ?: return
+        val nextColor = nextColorAfter(category.color)
+        receiptDatabaseHelper.updateCategory(category.id, category.name, nextColor)
+        loadCategories()
     }
 
     private fun confirmDelete(position: Int) {
@@ -106,68 +113,21 @@ class ManageCategoriesActivity : AppCompatActivity() {
             .setMessage("Delete ${category.name}?")
             .setNegativeButton("Cancel", null)
             .setPositiveButton("Delete") { _, _ ->
-                categories.removeAt(position)
-                saveCategories()
-                categoryAdapter.replaceItems(categories)
+                receiptDatabaseHelper.deleteCategory(category.id)
+                loadCategories()
             }
             .show()
     }
 
     private fun loadCategories() {
-        val savedCategories = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(KEY_CATEGORIES, null)
-
         categories.clear()
-        categories.addAll(
-            savedCategories
-                ?.lines()
-                ?.mapNotNull { line -> parseCategory(line) }
-                ?.takeIf { it.isNotEmpty() }
-                ?: defaultCategories
-        )
+        categories.addAll(receiptDatabaseHelper.getAllCategories())
         categoryAdapter.replaceItems(categories)
     }
 
-    private fun saveCategories() {
-        val value = categories.joinToString("\n") { category ->
-            "${category.name}|${category.color}"
-        }
-
-        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_CATEGORIES, value)
-            .apply()
-    }
-
-    private fun parseCategory(line: String): Category? {
-        val parts = line.split("|")
-        if (parts.size != 2) {
-            return null
-        }
-
-        val name = parts[0].trim()
-        val color = parts[1].toIntOrNull() ?: return null
-
-        return if (name.isBlank()) null else Category(name, color)
-    }
-
-    companion object {
-        private const val PREFS_NAME = "categories"
-        private const val KEY_CATEGORIES = "category_list"
-
-        private val categoryColors = listOf(
-            Color.rgb(103, 80, 164),
-            Color.rgb(46, 125, 50),
-            Color.rgb(2, 119, 189),
-            Color.rgb(239, 108, 0),
-            Color.rgb(198, 40, 40)
-        )
-
-        private val defaultCategories = listOf(
-            Category("Food", categoryColors[0]),
-            Category("Transportation", categoryColors[1]),
-            Category("School", categoryColors[2]),
-            Category("Coffee", categoryColors[3])
-        )
+    private fun nextColorAfter(currentColor: Int): Int {
+        val colors = ReceiptDatabaseHelper.categoryColors
+        val currentIndex = colors.indexOf(currentColor).takeIf { it >= 0 } ?: 0
+        return colors[(currentIndex + 1) % colors.size]
     }
 }
