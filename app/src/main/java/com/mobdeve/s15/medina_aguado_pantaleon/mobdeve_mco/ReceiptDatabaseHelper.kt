@@ -11,6 +11,15 @@ class ReceiptDatabaseHelper(context: Context) :
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """
+            CREATE TABLE $TABLE_USERS (
+                $COL_USER_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COL_USER_NAME TEXT NOT NULL,
+                $COL_USER_EMAIL TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
             CREATE TABLE $TABLE_RECEIPTS (
                 $COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COL_STORE_NAME TEXT NOT NULL,
@@ -25,11 +34,80 @@ class ReceiptDatabaseHelper(context: Context) :
             """.trimIndent()
         )
         seedReceipts(db)
+        seedDefaultUser(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RECEIPTS")
         onCreate(db)
+    }
+
+    fun ensureDefaultUser(sessionManager: SessionManager) {
+        if (sessionManager.getUserId() == -1L) {
+            val db = readableDatabase
+            val cursor = db.query(TABLE_USERS, arrayOf(COL_USER_ID), null, null, null, null, null)
+            if (cursor.moveToFirst()) {
+                sessionManager.saveUserId(cursor.getLong(0))
+            } else {
+                // Should not happen if seedDefaultUser works, but as a backup:
+                val userId = insertUser("John Doe", "johndoe@email.com")
+                sessionManager.saveUserId(userId)
+            }
+            cursor.close()
+        }
+    }
+
+    fun insertUser(name: String, email: String): Long {
+        val values = ContentValues().apply {
+            put(COL_USER_NAME, name)
+            put(COL_USER_EMAIL, email)
+        }
+        return writableDatabase.insert(TABLE_USERS, null, values)
+    }
+
+    fun getUserById(id: Long): User? {
+        val db = readableDatabase
+        db.query(
+            TABLE_USERS,
+            null,
+            "$COL_USER_ID = ?",
+            arrayOf(id.toString()),
+            null,
+            null,
+            null
+        ).use { cursor ->
+            if (cursor.moveToFirst()) {
+                return User(
+                    id = cursor.getLong(cursor.getColumnIndexOrThrow(COL_USER_ID)),
+                    name = cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_NAME)),
+                    email = cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_EMAIL))
+                )
+            }
+        }
+        return null
+    }
+
+    fun updateUser(user: User): Boolean {
+        val values = ContentValues().apply {
+            put(COL_USER_NAME, user.name)
+            put(COL_USER_EMAIL, user.email)
+        }
+        val rowsUpdated = writableDatabase.update(
+            TABLE_USERS,
+            values,
+            "$COL_USER_ID = ?",
+            arrayOf(user.id.toString())
+        )
+        return rowsUpdated > 0
+    }
+
+    private fun seedDefaultUser(db: SQLiteDatabase) {
+        val values = ContentValues().apply {
+            put(COL_USER_NAME, "John Doe")
+            put(COL_USER_EMAIL, "johndoe@email.com")
+        }
+        db.insert(TABLE_USERS, null, values)
     }
 
     fun insertReceipt(
@@ -232,7 +310,12 @@ class ReceiptDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "receipt_tracker.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
+
+        private const val TABLE_USERS = "users"
+        private const val COL_USER_ID = "user_id"
+        private const val COL_USER_NAME = "name"
+        private const val COL_USER_EMAIL = "email"
 
         private const val TABLE_RECEIPTS = "receipts"
         private const val COL_ID = "id"
