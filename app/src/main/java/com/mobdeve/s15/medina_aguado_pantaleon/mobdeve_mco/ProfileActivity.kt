@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 
 class ProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +21,13 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnAbout).setOnClickListener {
-            Toast.makeText(this, "Receipt Tracker 4k UI prototype", Toast.LENGTH_SHORT).show()
+
+            val dialogView = layoutInflater.inflate(R.layout.dialog_about, null)
+
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setPositiveButton("OK", null)
+                .show()
         }
 
         findViewById<Button>(R.id.btnLogout).setOnClickListener {
