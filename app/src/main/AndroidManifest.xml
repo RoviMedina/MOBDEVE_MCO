@@ -24,6 +24,7 @@
         <activity android:name=".ReceiptDetailsActivity" />
         <activity android:name=".ReportsActivity" />
         <activity android:name=".ProfileActivity" />
+        <activity android:name=".EditProfileActivity" />
         <activity
             android:name=".CurrencySettingsActivity"
             android:exported="false" />
