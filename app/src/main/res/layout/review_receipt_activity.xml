@@ -19,7 +19,7 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <!-- TODO: Prefill these fields from OCR results instead of static sample text. -->
+        <!-- OCR prefills these fields. Users can still correct imperfect scan results before saving. -->
         <EditText
             android:id="@+id/etStoreName"
             android:layout_width="match_parent"
@@ -64,12 +64,23 @@
 
         <!-- TODO: Make receipt line items editable with add/remove controls. -->
         <TextView
+            android:id="@+id/tvReceiptItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:background="#EEEEEE"
             android:padding="12dp"
             android:text="Chickenjoy - &#8369;120.00\nBurger Steak - &#8369;100.00\nDrink - &#8369;30.00" />
+
+        <TextView
+            android:id="@+id/tvOcrRawText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="#EEEEEE"
+            android:padding="12dp"
+            android:text="OCR raw text will appear here after scanning."
+            android:textColor="@color/textSecondary" />
 
         <Button
             android:id="@+id/btnSaveReceipt"
