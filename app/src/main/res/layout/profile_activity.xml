@@ -46,7 +46,7 @@
                     android:layout_width="90dp"
                     android:layout_height="90dp"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    android:tint="@color/primary" />
+                    app:tint="@color/primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -113,6 +113,26 @@
                 android:gravity="start|center_vertical"
                 android:padding="20dp"
                 android:text="Currency Settings"
+                android:textAllCaps="false"
+                android:textColor="@color/textPrimary"
+                android:textSize="17sp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp">
+
+            <Button
+                android:id="@+id/btnBudget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:gravity="start|center_vertical"
+                android:padding="20dp"
+                android:text="Budget Settings"
                 android:textAllCaps="false"
                 android:textColor="@color/textPrimary"
                 android:textSize="17sp" />
