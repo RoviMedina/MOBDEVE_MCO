@@ -1,9 +1,10 @@
 package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
 
@@ -12,9 +13,7 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.profile_activity)
 
-        findViewById<Button>(R.id.btnManageCategories).setOnClickListener {
-            Toast.makeText(this, "TODO: Build category management screen.", Toast.LENGTH_SHORT).show()
-        }
+        loadProfileInfo()
 
         findViewById<Button>(R.id.btnCurrency).setOnClickListener {
 
@@ -30,6 +29,11 @@ class ProfileActivity : AppCompatActivity() {
 
         }
 
+        findViewById<Button>(R.id.btnManageCategories).setOnClickListener {
+            val intent = Intent(this, ManageCategoriesActivity::class.java)
+            startActivity(intent)
+        }
+
         findViewById<Button>(R.id.btnAbout).setOnClickListener {
 
             val dialogView = layoutInflater.inflate(R.layout.dialog_about, null)
@@ -41,11 +45,29 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnLogout).setOnClickListener {
-            // TODO: Clear saved session once authentication is implemented.
+            getSharedPreferences("account", Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("is_logged_in", false)
+                .apply()
+
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             finish()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadProfileInfo()
+    }
+
+    private fun loadProfileInfo() {
+        val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
+        val name = prefs.getString("name", "Guest User")
+        val email = prefs.getString("email", "No email saved")
+
+        findViewById<TextView>(R.id.tvProfileName).text = name
+        findViewById<TextView>(R.id.tvProfileEmail).text = email
     }
 }

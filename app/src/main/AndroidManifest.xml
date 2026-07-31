@@ -26,6 +26,9 @@
         <activity android:name=".ReportsActivity" />
         <activity android:name=".ProfileActivity" />
         <activity
+            android:name=".ManageCategoriesActivity"
+            android:exported="false" />
+        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
