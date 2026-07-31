@@ -15,6 +15,7 @@ class ExpenseHistoryActivity : AppCompatActivity() {
     private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
     private lateinit var receiptAdapter: ReceiptAdapter
     private lateinit var tvEmptyReceipts: TextView
+    private lateinit var rvReceipts: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +31,9 @@ class ExpenseHistoryActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        findViewById<RecyclerView>(R.id.rvReceipts).apply {
+        rvReceipts = findViewById(R.id.rvReceipts)
+
+        rvReceipts.apply {
             layoutManager = LinearLayoutManager(this@ExpenseHistoryActivity)
             adapter = receiptAdapter
         }
@@ -63,6 +66,13 @@ class ExpenseHistoryActivity : AppCompatActivity() {
         }
 
         receiptAdapter.submitList(receipts)
-        tvEmptyReceipts.visibility = if (receipts.isEmpty()) View.VISIBLE else View.GONE
+
+        if (receipts.isEmpty()) {
+            tvEmptyReceipts.visibility = View.VISIBLE
+            rvReceipts.visibility = View.GONE
+        } else {
+            tvEmptyReceipts.visibility = View.GONE
+            rvReceipts.visibility = View.VISIBLE
+        }
     }
 }
