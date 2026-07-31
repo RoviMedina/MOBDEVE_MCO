@@ -28,10 +28,12 @@
             android:textColor="@color/textSecondary"
             android:textSize="15sp" />
 
-        <!-- TODO: Replace sample profile with logged-in user data. -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
             app:cardCornerRadius="22dp"
             app:cardElevation="4dp">
 
@@ -49,6 +51,7 @@
                     app:tint="@color/primary" />
 
                 <TextView
+                    android:id="@+id/tvProfileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
@@ -58,12 +61,23 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvProfileEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="johndoe@email.com"
                     android:textColor="@color/textSecondary"
                     android:textSize="15sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEditProfile"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/edit_profile"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
