@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.util.Locale
 
@@ -21,14 +22,25 @@ class ReceiptDetailsActivity : AppCompatActivity() {
         loadReceiptDetails()
 
         findViewById<Button>(R.id.btnEditReceipt).setOnClickListener {
-            // TODO: Pass the selected receipt id to ReviewReceiptActivity for editing.
-            startActivity(Intent(this, ReviewReceiptActivity::class.java))
+            if (receiptId == -1L) {
+                Toast.makeText(this, "Receipt not found.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val intent = Intent(this, ReviewReceiptActivity::class.java).apply {
+                putExtra(ReviewReceiptActivity.EXTRA_RECEIPT_ID, receiptId)
+            }
+            startActivity(intent)
         }
 
         findViewById<Button>(R.id.btnDeleteReceipt).setOnClickListener {
-            // TODO: Delete the selected receipt from SQLite after adding a confirmation dialog.
-            Toast.makeText(this, "TODO: Add delete confirmation and database removal.", Toast.LENGTH_SHORT).show()
+            showDeleteConfirmation()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadReceiptDetails()
     }
 
     private fun loadReceiptDetails() {
@@ -48,6 +60,34 @@ class ReceiptDetailsActivity : AppCompatActivity() {
         if (!receipt.imageUri.isNullOrBlank()) {
             findViewById<TextView>(R.id.tvReceiptImagePlaceholder).text = "Receipt image saved from scan/gallery"
         }
+    }
+
+    private fun showDeleteConfirmation() {
+        if (receiptId == -1L) {
+            Toast.makeText(this, "Receipt not found.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_receipt, null)
+        AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { _, _ ->
+                deleteReceipt()
+            }
+            .show()
+    }
+
+    private fun deleteReceipt() {
+        val deleted = receiptDatabaseHelper.deleteReceipt(receiptId)
+        if (!deleted) {
+            Toast.makeText(this, "Could not delete receipt.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Toast.makeText(this, "Receipt deleted.", Toast.LENGTH_SHORT).show()
+        startActivity(Intent(this, ExpenseHistoryActivity::class.java))
+        finish()
     }
 
     companion object {

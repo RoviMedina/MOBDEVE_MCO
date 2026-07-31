@@ -55,6 +55,44 @@ class ReceiptDatabaseHelper(context: Context) :
         return writableDatabase.insert(TABLE_RECEIPTS, null, values)
     }
 
+    fun updateReceipt(
+        id: Long,
+        storeName: String,
+        receiptDate: String,
+        category: String,
+        totalAmount: Double,
+        items: String,
+        rawText: String,
+        imageUri: String?
+    ): Boolean {
+        val values = ContentValues().apply {
+            put(COL_STORE_NAME, storeName)
+            put(COL_RECEIPT_DATE, receiptDate)
+            put(COL_CATEGORY, category)
+            put(COL_TOTAL_AMOUNT, totalAmount)
+            put(COL_ITEMS, items)
+            put(COL_RAW_TEXT, rawText)
+            put(COL_IMAGE_URI, imageUri)
+        }
+
+        val rowsUpdated = writableDatabase.update(
+            TABLE_RECEIPTS,
+            values,
+            "$COL_ID = ?",
+            arrayOf(id.toString())
+        )
+        return rowsUpdated > 0
+    }
+
+    fun deleteReceipt(id: Long): Boolean {
+        val rowsDeleted = writableDatabase.delete(
+            TABLE_RECEIPTS,
+            "$COL_ID = ?",
+            arrayOf(id.toString())
+        )
+        return rowsDeleted > 0
+    }
+
     fun getAllReceipts(): List<Receipt> {
         return queryReceipts(null, null)
     }
