@@ -92,6 +92,7 @@ class RegisterActivity : AppCompatActivity() {
             .putString("email", email)
             .putString("password", password)
             .putBoolean("is_logged_in", true)
+            .putBoolean("is_guest", false)
             .apply()
 
         Toast.makeText(this, "Account created.", Toast.LENGTH_SHORT).show()

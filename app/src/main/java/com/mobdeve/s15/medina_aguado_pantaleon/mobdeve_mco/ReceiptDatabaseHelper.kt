@@ -62,7 +62,6 @@ class ReceiptDatabaseHelper(context: Context) :
             if (cursor.moveToFirst()) {
                 sessionManager.saveUserId(cursor.getLong(0))
             } else {
-                // Should not happen if seedDefaultUser works, but as a backup:
                 val userId = insertUser("John Doe", "johndoe@email.com")
                 sessionManager.saveUserId(userId)
             }

@@ -19,7 +19,6 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <!-- OCR prefills these fields. Users can still correct imperfect scan results before saving. -->
         <EditText
             android:id="@+id/etStoreName"
             android:layout_width="match_parent"

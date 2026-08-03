@@ -32,6 +32,10 @@ class MainActivity : AppCompatActivity() {
             loginAccount()
         }
 
+        findViewById<Button>(R.id.btnGuestLogin).setOnClickListener {
+            loginAsGuest()
+        }
+
         findViewById<Button>(R.id.btnRegister).setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
@@ -62,8 +66,22 @@ class MainActivity : AppCompatActivity() {
 
         prefs.edit()
             .putBoolean("is_logged_in", true)
+            .putBoolean("is_guest", false)
             .apply()
 
+        openDashboard()
+    }
+
+    private fun loginAsGuest() {
+        getSharedPreferences("account", Context.MODE_PRIVATE)
+            .edit()
+            .putString("name", "Guest User")
+            .putString("email", "Guest session")
+            .putBoolean("is_logged_in", true)
+            .putBoolean("is_guest", true)
+            .apply()
+
+        SessionManager(this).clearSession()
         openDashboard()
     }
 
@@ -85,7 +103,8 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
         val isLoggedIn = prefs.getBoolean("is_logged_in", false)
         val savedEmail = prefs.getString("email", null)
-        return isLoggedIn && !savedEmail.isNullOrBlank()
+        val isGuest = prefs.getBoolean("is_guest", false)
+        return isLoggedIn && (isGuest || !savedEmail.isNullOrBlank())
     }
 
     private fun openDashboard() {
