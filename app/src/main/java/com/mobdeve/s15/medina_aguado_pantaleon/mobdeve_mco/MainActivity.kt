@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity() {
             .apply()
 
         SessionManager(this).clearSession()
+        ReceiptDatabaseHelper(this).clearReceiptsForCurrentOwner()
         openDashboard()
     }
 

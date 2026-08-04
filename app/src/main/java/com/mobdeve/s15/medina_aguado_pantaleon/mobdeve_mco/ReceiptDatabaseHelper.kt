@@ -5,9 +5,11 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Color
+import java.util.Locale
 
 class ReceiptDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+    private val appContext = context.applicationContext
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -30,6 +32,7 @@ class ReceiptDatabaseHelper(context: Context) :
                 $COL_ITEMS TEXT NOT NULL,
                 $COL_RAW_TEXT TEXT NOT NULL,
                 $COL_IMAGE_URI TEXT,
+                $COL_OWNER_KEY TEXT NOT NULL DEFAULT '$OWNER_LEGACY',
                 $COL_CREATED_AT INTEGER NOT NULL
             )
             """.trimIndent()
@@ -43,29 +46,23 @@ class ReceiptDatabaseHelper(context: Context) :
             )
             """.trimIndent()
         )
-        seedReceipts(db)
-        seedDefaultUser(db)
         seedCategories(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_RECEIPTS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_CATEGORIES")
-        onCreate(db)
+        if (oldVersion < 3) {
+            removeSeedReceipts(db)
+            removeSeedUser(db)
+        }
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE $TABLE_RECEIPTS ADD COLUMN $COL_OWNER_KEY TEXT NOT NULL DEFAULT '$OWNER_LEGACY'")
+        }
     }
 
     fun ensureDefaultUser(sessionManager: SessionManager) {
         if (sessionManager.getUserId() == -1L) {
-            val db = readableDatabase
-            val cursor = db.query(TABLE_USERS, arrayOf(COL_USER_ID), null, null, null, null, null)
-            if (cursor.moveToFirst()) {
-                sessionManager.saveUserId(cursor.getLong(0))
-            } else {
-                val userId = insertUser("John Doe", "johndoe@email.com")
-                sessionManager.saveUserId(userId)
-            }
-            cursor.close()
+            val userId = insertUser("Guest User", "Guest session")
+            sessionManager.saveUserId(userId)
         }
     }
 
@@ -113,14 +110,6 @@ class ReceiptDatabaseHelper(context: Context) :
         return rowsUpdated > 0
     }
 
-    private fun seedDefaultUser(db: SQLiteDatabase) {
-        val values = ContentValues().apply {
-            put(COL_USER_NAME, "John Doe")
-            put(COL_USER_EMAIL, "johndoe@email.com")
-        }
-        db.insert(TABLE_USERS, null, values)
-    }
-
     fun insertReceipt(
         storeName: String,
         receiptDate: String,
@@ -138,6 +127,7 @@ class ReceiptDatabaseHelper(context: Context) :
             put(COL_ITEMS, items)
             put(COL_RAW_TEXT, rawText)
             put(COL_IMAGE_URI, imageUri)
+            put(COL_OWNER_KEY, currentOwnerKey())
             put(COL_CREATED_AT, System.currentTimeMillis())
         }
 
@@ -167,8 +157,8 @@ class ReceiptDatabaseHelper(context: Context) :
         val rowsUpdated = writableDatabase.update(
             TABLE_RECEIPTS,
             values,
-            "$COL_ID = ?",
-            arrayOf(id.toString())
+            "$COL_ID = ? AND $COL_OWNER_KEY = ?",
+            arrayOf(id.toString(), currentOwnerKey())
         )
         return rowsUpdated > 0
     }
@@ -176,8 +166,8 @@ class ReceiptDatabaseHelper(context: Context) :
     fun deleteReceipt(id: Long): Boolean {
         val rowsDeleted = writableDatabase.delete(
             TABLE_RECEIPTS,
-            "$COL_ID = ?",
-            arrayOf(id.toString())
+            "$COL_ID = ? AND $COL_OWNER_KEY = ?",
+            arrayOf(id.toString(), currentOwnerKey())
         )
         return rowsDeleted > 0
     }
@@ -192,8 +182,8 @@ class ReceiptDatabaseHelper(context: Context) :
         readableDatabase.query(
             TABLE_RECEIPTS,
             null,
-            null,
-            null,
+            "$COL_OWNER_KEY = ?",
+            arrayOf(currentOwnerKey()),
             null,
             null,
             "$COL_CREATED_AT DESC",
@@ -219,8 +209,8 @@ class ReceiptDatabaseHelper(context: Context) :
         readableDatabase.query(
             TABLE_RECEIPTS,
             null,
-            "$COL_ID = ?",
-            arrayOf(id.toString()),
+            "$COL_ID = ? AND $COL_OWNER_KEY = ?",
+            arrayOf(id.toString(), currentOwnerKey()),
             null,
             null,
             null
@@ -231,8 +221,8 @@ class ReceiptDatabaseHelper(context: Context) :
 
     fun getTotalExpenses(): Double {
         val cursor = readableDatabase.rawQuery(
-            "SELECT SUM($COL_TOTAL_AMOUNT) FROM $TABLE_RECEIPTS",
-            null
+            "SELECT SUM($COL_TOTAL_AMOUNT) FROM $TABLE_RECEIPTS WHERE $COL_OWNER_KEY = ?",
+            arrayOf(currentOwnerKey())
         )
 
         cursor.use {
@@ -246,8 +236,8 @@ class ReceiptDatabaseHelper(context: Context) :
 
     fun getReceiptCount(): Int {
         val cursor = readableDatabase.rawQuery(
-            "SELECT COUNT(*) FROM $TABLE_RECEIPTS",
-            null
+            "SELECT COUNT(*) FROM $TABLE_RECEIPTS WHERE $COL_OWNER_KEY = ?",
+            arrayOf(currentOwnerKey())
         )
 
         cursor.use {
@@ -319,11 +309,18 @@ class ReceiptDatabaseHelper(context: Context) :
 
     private fun queryReceipts(selection: String?, selectionArgs: Array<String>?): List<Receipt> {
         val receipts = mutableListOf<Receipt>()
+        val ownerSelection = if (selection.isNullOrBlank()) {
+            "$COL_OWNER_KEY = ?"
+        } else {
+            "$COL_OWNER_KEY = ? AND ($selection)"
+        }
+        val ownerSelectionArgs = arrayOf(currentOwnerKey()) + (selectionArgs ?: emptyArray())
+
         readableDatabase.query(
             TABLE_RECEIPTS,
             null,
-            selection,
-            selectionArgs,
+            ownerSelection,
+            ownerSelectionArgs,
             null,
             null,
             "$COL_CREATED_AT DESC"
@@ -335,32 +332,42 @@ class ReceiptDatabaseHelper(context: Context) :
         return receipts
     }
 
-    private fun seedReceipts(db: SQLiteDatabase) {
-        insertSeedReceipt(db, "Jollibee", "Today", "Food", 250.00, "Chickenjoy - PHP 120.00\nBurger Steak - PHP 100.00\nDrink - PHP 30.00")
-        insertSeedReceipt(db, "National Bookstore", "Yesterday", "School", 500.00, "Notebook - PHP 120.00\nPens - PHP 80.00\nReference Book - PHP 300.00")
-        insertSeedReceipt(db, "Grab", "June 26", "Transportation", 180.00, "Ride fare - PHP 165.00\nPlatform fee - PHP 15.00")
-        insertSeedReceipt(db, "Starbucks", "June 25", "Food", 320.00, "Latte - PHP 190.00\nSandwich - PHP 130.00")
+    fun clearReceiptsForCurrentOwner() {
+        writableDatabase.delete(
+            TABLE_RECEIPTS,
+            "$COL_OWNER_KEY = ?",
+            arrayOf(currentOwnerKey())
+        )
     }
 
-    private fun insertSeedReceipt(
-        db: SQLiteDatabase,
-        storeName: String,
-        receiptDate: String,
-        category: String,
-        totalAmount: Double,
-        items: String
-    ) {
-        val values = ContentValues().apply {
-            put(COL_STORE_NAME, storeName)
-            put(COL_RECEIPT_DATE, receiptDate)
-            put(COL_CATEGORY, category)
-            put(COL_TOTAL_AMOUNT, totalAmount)
-            put(COL_ITEMS, items)
-            put(COL_RAW_TEXT, items)
-            putNull(COL_IMAGE_URI)
-            put(COL_CREATED_AT, System.currentTimeMillis())
+    private fun currentOwnerKey(): String {
+        val prefs = appContext.getSharedPreferences("account", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("is_guest", false)) {
+            return OWNER_GUEST
         }
-        db.insert(TABLE_RECEIPTS, null, values)
+
+        return prefs.getString("email", null)
+            ?.trim()
+            ?.lowercase(Locale.US)
+            ?.takeIf { it.isNotBlank() }
+            ?: OWNER_LEGACY
+    }
+
+    private fun removeSeedReceipts(db: SQLiteDatabase) {
+        val seedStores = arrayOf("Jollibee", "National Bookstore", "Grab", "Starbucks")
+        db.delete(
+            TABLE_RECEIPTS,
+            "$COL_STORE_NAME IN (?, ?, ?, ?) AND $COL_IMAGE_URI IS NULL",
+            seedStores
+        )
+    }
+
+    private fun removeSeedUser(db: SQLiteDatabase) {
+        db.delete(
+            TABLE_USERS,
+            "$COL_USER_NAME = ? AND $COL_USER_EMAIL = ?",
+            arrayOf("John Doe", "johndoe@email.com")
+        )
     }
 
     private fun seedCategories(db: SQLiteDatabase) {
@@ -411,7 +418,7 @@ class ReceiptDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "receipt_tracker.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 4
 
         private const val TABLE_USERS = "users"
         private const val COL_USER_ID = "user_id"
@@ -427,7 +434,10 @@ class ReceiptDatabaseHelper(context: Context) :
         private const val COL_ITEMS = "items"
         private const val COL_RAW_TEXT = "raw_text"
         private const val COL_IMAGE_URI = "image_uri"
+        private const val COL_OWNER_KEY = "owner_key"
         private const val COL_CREATED_AT = "created_at"
+        private const val OWNER_GUEST = "guest"
+        private const val OWNER_LEGACY = "legacy"
 
         private const val TABLE_CATEGORIES = "categories"
         private const val COL_CATEGORY_ID = "category_id"

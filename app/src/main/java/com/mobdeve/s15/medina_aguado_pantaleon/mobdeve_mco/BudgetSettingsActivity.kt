@@ -24,12 +24,9 @@ class BudgetSettingsActivity : AppCompatActivity() {
         tilMonthlyBudget.prefixText = MoneyFormatter.prefix(this)
         tvBudgetExamples.text = buildBudgetExampleText()
 
-        val savedBudget = prefs.getString("monthly_budget", "5000.00")
+        val savedBudget = prefs.getString("monthly_budget", null)
             ?.toDoubleOrNull()
-            ?: 5000.00
-        etMonthlyBudget.setText(
-            MoneyFormatter.formatInputAmount(this, savedBudget)
-        )
+        etMonthlyBudget.setText(savedBudget?.let { MoneyFormatter.formatInputAmount(this, it) }.orEmpty())
 
         btnSaveBudget.setOnClickListener {
 

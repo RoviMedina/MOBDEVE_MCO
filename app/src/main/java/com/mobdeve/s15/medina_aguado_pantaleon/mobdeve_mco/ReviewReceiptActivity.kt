@@ -36,18 +36,18 @@ class ReviewReceiptActivity : AppCompatActivity() {
         existingImageUri = existingReceipt?.imageUri
         val initialItemText = intent.getStringExtra(EXTRA_ITEMS)
             ?: existingReceipt?.items
-            ?: "Chickenjoy - PHP 120.00\nBurger Steak - PHP 100.00\nDrink - PHP 30.00"
+            ?: ""
 
-        etStoreName.setText(intent.getStringExtra(EXTRA_STORE_NAME) ?: existingReceipt?.storeName ?: "Jollibee")
-        etReceiptDate.setText(intent.getStringExtra(EXTRA_RECEIPT_DATE) ?: existingReceipt?.receiptDate ?: "June 27, 2026")
-        etTotalAmount.setText(
-            displayAmountText(
-                intent.getStringExtra(EXTRA_TOTAL_AMOUNT)?.toDoubleOrNull()
-                    ?: existingReceipt?.totalAmount
-                    ?: 250.00
-            )
-        )
-        etCategory.setText(intent.getStringExtra(EXTRA_CATEGORY) ?: existingReceipt?.category ?: "Food")
+        etStoreName.setText(intent.getStringExtra(EXTRA_STORE_NAME) ?: existingReceipt?.storeName.orEmpty())
+        etReceiptDate.setText(intent.getStringExtra(EXTRA_RECEIPT_DATE) ?: existingReceipt?.receiptDate.orEmpty())
+        val scannedTotal = intent.getStringExtra(EXTRA_TOTAL_AMOUNT)?.toDoubleOrNull()
+        val totalAmountText = when {
+            scannedTotal != null -> displayAmountText(scannedTotal)
+            existingReceipt != null -> displayAmountText(existingReceipt.totalAmount)
+            else -> ""
+        }
+        etTotalAmount.setText(totalAmountText)
+        etCategory.setText(intent.getStringExtra(EXTRA_CATEGORY) ?: existingReceipt?.category.orEmpty())
         tvOcrRawText.text = intent.getStringExtra(EXTRA_RAW_TEXT)?.ifBlank { "No OCR text detected." }
             ?: existingReceipt?.rawText
             ?: "OCR raw text will appear here after scanning."

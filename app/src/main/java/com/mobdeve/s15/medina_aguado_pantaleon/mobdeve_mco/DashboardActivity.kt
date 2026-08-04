@@ -100,9 +100,9 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun getMonthlyBudget(): Double {
         return getSharedPreferences("settings", Context.MODE_PRIVATE)
-            .getString("monthly_budget", "5000.00")
+            .getString("monthly_budget", null)
             ?.toDoubleOrNull()
-            ?: 5000.00
+            ?: 0.00
     }
 
     private fun budgetPercent(totalExpenses: Double, monthlyBudget: Double): Int {

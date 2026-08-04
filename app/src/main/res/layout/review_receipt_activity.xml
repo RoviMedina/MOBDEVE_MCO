@@ -24,8 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:hint="Store Name"
-            android:text="Jollibee" />
+            android:hint="Store Name" />
 
         <EditText
             android:id="@+id/etReceiptDate"
@@ -41,8 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             android:hint="Total Amount"
-            android:inputType="numberDecimal"
-            android:text="250.00" />
+            android:inputType="numberDecimal" />
 
         <EditText
             android:id="@+id/etCategory"
