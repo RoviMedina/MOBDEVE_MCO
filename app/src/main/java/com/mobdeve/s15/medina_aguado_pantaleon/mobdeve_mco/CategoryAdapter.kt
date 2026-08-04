@@ -29,8 +29,9 @@ class CategoryAdapter(
     }
 
     fun replaceItems(newCategories: List<Category>) {
+        val updatedCategories = newCategories.toList()
         categories.clear()
-        categories.addAll(newCategories)
+        categories.addAll(updatedCategories)
         notifyDataSetChanged()
     }
 

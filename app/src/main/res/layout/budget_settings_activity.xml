@@ -47,11 +47,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:background="#EEEEEE"
-            android:padding="16dp"
-            android:text="Food: 2,000\nTransportation: 1,000\nSchool: 1,500\nCoffee: 500"
+            android:text="Category Budgets"
             android:textColor="@color/textPrimary"
-            android:textSize="16sp" />
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/layoutCategoryBudgets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSaveBudget"

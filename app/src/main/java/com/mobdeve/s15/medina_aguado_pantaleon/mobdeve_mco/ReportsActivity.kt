@@ -288,9 +288,22 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun getMonthlyBudget(): Double {
         return getSharedPreferences("settings", Context.MODE_PRIVATE)
-            .getString("monthly_budget", null)
+            .getString("monthly_budget_${accountKey()}", null)
             ?.toDoubleOrNull()
             ?: 0.00
+    }
+
+    private fun accountKey(): String {
+        val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("is_guest", false)) {
+            return "guest"
+        }
+
+        return prefs.getString("email", null)
+            ?.trim()
+            ?.lowercase(Locale.US)
+            ?.takeIf { it.isNotBlank() }
+            ?: "legacy"
     }
 
     private fun budgetPercent(totalExpenses: Double, monthlyBudget: Double): Int {
