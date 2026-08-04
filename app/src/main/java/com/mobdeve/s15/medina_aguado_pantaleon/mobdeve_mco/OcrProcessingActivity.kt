@@ -120,7 +120,7 @@ class OcrProcessingActivity : AppCompatActivity() {
 
     private fun parseReceiptText(rawText: String): ParsedReceipt {
         val lines = rawText.lines()
-            .map { line -> line.trim().replace(Regex("\\s+"), " ") }
+            .map { line -> cleanOcrLine(line) }
             .filter { it.isNotEmpty() }
 
         val storeName = findStoreName(lines)
@@ -152,9 +152,24 @@ class OcrProcessingActivity : AppCompatActivity() {
     }
 
     private fun findReceiptDate(lines: List<String>): String {
-        return lines.firstNotNullOfOrNull { line ->
-            datePattern.find(line)?.value
-        }.orEmpty()
+        val labeledDate = lines
+            .mapIndexed { index, line -> index to line }
+            .firstNotNullOfOrNull { (index, line) ->
+                val normalized = line.lowercase(Locale.US)
+                if (!dateIssuedKeywords.any { keyword -> normalized.contains(keyword) }) {
+                    return@firstNotNullOfOrNull null
+                }
+
+                datePattern.find(line)?.value
+                    ?: lines.drop(index + 1).take(2).firstNotNullOfOrNull { nextLine ->
+                        datePattern.find(nextLine)?.value
+                    }
+            }
+
+        return labeledDate
+            ?: lines.firstNotNullOfOrNull { line ->
+                datePattern.find(line)?.value
+            }.orEmpty()
     }
 
     private fun findTotalAmount(lines: List<String>): String {
@@ -166,9 +181,14 @@ class OcrProcessingActivity : AppCompatActivity() {
                     !subtotalKeywords.any { keyword -> normalized.contains(keyword) }
             }
             .lastOrNull()
-            ?.second
+        val amountNearTotal = prioritizedTotal?.let { (index, line) ->
+            pricePattern.findAll(line).lastOrNull()?.value
+                ?: lines.drop(index + 1).take(4).firstNotNullOfOrNull { nextLine ->
+                    amountPattern.findAll(nextLine).lastOrNull()?.value
+                }
+        }
 
-        val amount = amountPattern.findAll(prioritizedTotal.orEmpty()).lastOrNull()?.value
+        val amount = amountNearTotal
             ?: lines.asReversed().firstNotNullOfOrNull { line ->
                 amountPattern.findAll(line).lastOrNull()?.value
             }
@@ -178,19 +198,73 @@ class OcrProcessingActivity : AppCompatActivity() {
     }
 
     private fun findItemLines(lines: List<String>): List<String> {
-        val itemLines = lines.filter { line ->
-            val normalized = line.lowercase(Locale.US)
-            val hasAmount = amountPattern.containsMatchIn(line)
-            val isReceiptSummary = receiptSummaryKeywords.any { keyword -> normalized.contains(keyword) }
-            val isReceiptNoise = noiseKeywords.any { keyword -> normalized.contains(keyword) }
+        val itemLines = mutableListOf<String>()
+        var reachedSummary = false
 
-            hasAmount && !isReceiptSummary && !isReceiptNoise
+        for (line in lines) {
+            val normalized = line.lowercase(Locale.US)
+            if (isItemHeader(normalized)) {
+                continue
+            }
+
+            if (isReceiptSummaryLine(normalized)) {
+                reachedSummary = true
+                continue
+            }
+
+            if (reachedSummary) {
+                continue
+            }
+
+            val priceMatch = pricePattern.findAll(line).lastOrNull() ?: continue
+            val price = normalizeAmount(priceMatch.value).toDoubleOrNull() ?: 0.0
+            val itemName = cleanItemName(line.removeRange(priceMatch.range))
+
+            if (isLikelyReceiptItem(itemName, normalized, price)) {
+                itemLines.add("$itemName ${normalizeAmount(priceMatch.value)}")
+            }
         }
 
         return itemLines
             .takeIf { it.isNotEmpty() }
-            ?: lines.filterNot { line -> noiseKeywords.any { keyword -> line.lowercase(Locale.US).contains(keyword) } }
-                .take(8)
+            ?: listOf("No line items detected")
+    }
+
+    private fun isLikelyReceiptItem(itemName: String, normalizedLine: String, price: Double): Boolean {
+        val normalizedName = itemName.lowercase(Locale.US)
+        val letterCount = itemName.count { it.isLetter() }
+        val digitCount = itemName.count { it.isDigit() }
+        val hasLetters = letterCount >= 2
+        val hasItemWord = itemKeywords.any { keyword -> normalizedName.contains(keyword) }
+        val isMostlyNumbers = digitCount > letterCount
+        val hasLongNumber = Regex("""\d{5,}""").containsMatchIn(itemName)
+        val isReceiptNoise = noiseKeywords.any { keyword -> normalizedLine.contains(keyword) }
+        val isCodeLike = codeKeywords.any { keyword -> normalizedName.contains(keyword) }
+
+        return price > 0.0 &&
+            (hasLetters || hasItemWord) &&
+            !isMostlyNumbers &&
+            !hasLongNumber &&
+            !isReceiptNoise &&
+            !isCodeLike
+    }
+
+    private fun isItemHeader(normalizedLine: String): Boolean {
+        return normalizedLine == "item" ||
+            normalizedLine == "items" ||
+            normalizedLine == "tem" ||
+            normalizedLine.contains("qty")
+    }
+
+    private fun isReceiptSummaryLine(normalizedLine: String): Boolean {
+        return receiptSummaryKeywords.any { keyword -> normalizedLine.contains(keyword) } ||
+            normalizedLine.startsWith("sales") ||
+            normalizedLine.startsWith("less") ||
+            normalizedLine.startsWith("vatable") ||
+            normalizedLine.startsWith("vat exempt") ||
+            normalizedLine.startsWith("zero rated") ||
+            normalizedLine.startsWith("cash tendered") ||
+            normalizedLine == "change"
     }
 
     private fun predictCategory(lines: List<String>): String {
@@ -204,7 +278,44 @@ class OcrProcessingActivity : AppCompatActivity() {
         return rawAmount
             .replace(",", "")
             .replace("PHP", "", ignoreCase = true)
+            .replace("\u20B1", "")
             .removePrefix("P")
+            .replace("$", "")
+            .trim()
+    }
+
+    private fun cleanOcrLine(rawLine: String): String {
+        return rawLine
+            .trim()
+            .replace(Regex("\\s+"), " ")
+            .replace(Regex("""\b[uv][ae]t[_\s-]*reg\b""", RegexOption.IGNORE_CASE), "VAT REG")
+            .replace(Regex("""\bt[!1l|]n\b""", RegexOption.IGNORE_CASE), "TIN")
+            .replace(Regex("""\b(?:dale|daie|dafe)\b""", RegexOption.IGNORE_CASE), "Date")
+            .replace(Regex("""\b(?:iqtal|iotal|1otal|tota[1l])\b""", RegexOption.IGNORE_CASE), "Total")
+            .replace(Regex("""\bja[kx]e[-\s]*qut\b""", RegexOption.IGNORE_CASE), "Take-Out")
+            .replace(Regex("""\b(?:inv[q0]ice|lnvoice|invo1ce)\b""", RegexOption.IGNORE_CASE), "Invoice")
+            .replace(Regex("""\b(?:seriel|sene[l1])\b""", RegexOption.IGNORE_CASE), "Serial")
+            .replace(Regex("""\bsuruey\b""", RegexOption.IGNORE_CASE), "Survey")
+            .replace(Regex("""\brece[!1]pt\b""", RegexOption.IGNORE_CASE), "Receipt")
+            .trim()
+    }
+
+    private fun cleanItemName(rawName: String): String {
+        return rawName
+            .trim(' ', '-', ':', '.', '\t')
+            .replace(Regex("""^[sS]?\d+\s*"""), "")
+            .replace(Regex("""(?<=[a-z])(?=[A-Z])"""), " ")
+            .replace(Regex("""\bch[1!l|]cken\b""", RegexOption.IGNORE_CASE), "Chicken")
+            .replace(Regex("""\bfr[1!l|]es\b""", RegexOption.IGNORE_CASE), "Fries")
+            .replace(Regex("""\b(?:burgcr|burqer)\b""", RegexOption.IGNORE_CASE), "Burger")
+            .replace(Regex("""\bc0ffee\b""", RegexOption.IGNORE_CASE), "Coffee")
+            .replace(Regex("""\bdr[1!l|]nk\b""", RegexOption.IGNORE_CASE), "Drink")
+            .replace(Regex("""\bcre\s*al\b""", RegexOption.IGNORE_CASE), "Cream")
+            .replace(Regex("""(?<=\p{Alpha})0(?=\p{Alpha})"""), "O")
+            .replace(Regex("""(?<=\p{Alpha})1(?=\p{Alpha})"""), "I")
+            .replace(Regex("""(?<=\p{Alpha})5(?=\p{Alpha})"""), "S")
+            .replace(Regex("""\s+\d{1,2}$"""), "")
+            .replace(Regex("\\s+"), " ")
             .trim()
     }
 
@@ -219,9 +330,18 @@ class OcrProcessingActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_IMAGE_URI = "extra_image_uri"
 
-        private val amountPattern = Regex("""(?:PHP|P)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+\.\d{2}""")
+        private val amountPattern = Regex("""(?:PHP|P|\u20B1|\$)\s*\d+(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:,\d{3})*\.\d{1,2}""")
+        private val pricePattern = Regex("""(?:PHP|P|\u20B1|\$)\s*\d+(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:,\d{3})*\.\d{1,2}|\b\d{1,4}\b$""")
         private val datePattern = Regex(
-            """\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})\b"""
+            """\b(?:\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{4}[./-]\d{1,2}[./-]\d{1,2}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})\b"""
+        )
+        private val dateIssuedKeywords = listOf(
+            "date issued",
+            "issue date",
+            "issued",
+            "or date",
+            "receipt date",
+            "date"
         )
 
         private val totalKeywords = listOf(
@@ -233,23 +353,90 @@ class OcrProcessingActivity : AppCompatActivity() {
             "total"
         )
         private val subtotalKeywords = listOf("subtotal", "sub total", "change", "cash", "card", "visa", "mastercard")
-        private val receiptSummaryKeywords = totalKeywords + subtotalKeywords + listOf("vat", "tax", "discount")
+        private val receiptSummaryKeywords = totalKeywords + subtotalKeywords + listOf("tax", "discount")
         private val noiseKeywords = listOf(
             "official receipt",
             "receipt",
             "invoice",
+            "inv",
             "tin",
+            "t!n",
+            "vat",
             "vat reg",
+            "vat_reg",
             "address",
+            "date",
             "tel",
+            "telephone",
             "phone",
+            "online delivery",
+            "delivery",
+            "visit",
+            "experience",
+            "tell us",
             "cashier",
             "transaction",
             "reference",
+            "ref",
             "thank you",
             "thanks",
             "www.",
-            ".com"
+            ".com",
+            "survey",
+            "serial",
+            "seriel",
+            "pcno",
+            "permit",
+            "terminal",
+            "machine",
+            "accreditation",
+            "min",
+            "bir",
+            "order no",
+            "control no"
+        )
+        private val codeKeywords = listOf(
+            "code",
+            "invoice",
+            "inv",
+            "tin",
+            "t!n",
+            "date",
+            "serial",
+            "seriel",
+            "pcno",
+            "id",
+            "permit",
+            "reference",
+            "ref",
+            "telephone",
+            "tel",
+            "phone"
+        )
+        private val itemKeywords = listOf(
+            "chicken",
+            "burger",
+            "fries",
+            "rice",
+            "meal",
+            "drink",
+            "coffee",
+            "tea",
+            "milk",
+            "bread",
+            "water",
+            "juice",
+            "spaghetti",
+            "sandwich",
+            "pizza",
+            "latte",
+            "cream",
+            "frappe",
+            "mcflurry",
+            "notebook",
+            "pen",
+            "book",
+            "fare"
         )
         private val categoryKeywords = listOf(
             "Food" to listOf(

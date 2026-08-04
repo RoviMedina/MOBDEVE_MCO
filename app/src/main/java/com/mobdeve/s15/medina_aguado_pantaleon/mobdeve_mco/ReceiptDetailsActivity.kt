@@ -56,7 +56,7 @@ class ReceiptDetailsActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvReceiptDate).text = "Date: ${receipt.receiptDate}"
         findViewById<TextView>(R.id.tvReceiptCategory).text = "Category: ${receipt.category}"
         findViewById<TextView>(R.id.tvReceiptTotal).text = "Total: ${MoneyFormatter.format(this, receipt.totalAmount)}"
-        findViewById<TextView>(R.id.tvReceiptItems).text = receipt.items
+        findViewById<TextView>(R.id.tvReceiptItems).text = MoneyFormatter.formatLineItems(this, receipt.items)
 
         loadReceiptImage(receipt.imageUri)
     }

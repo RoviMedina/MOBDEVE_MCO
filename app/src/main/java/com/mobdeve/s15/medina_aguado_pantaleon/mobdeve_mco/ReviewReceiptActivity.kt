@@ -40,7 +40,13 @@ class ReviewReceiptActivity : AppCompatActivity() {
 
         etStoreName.setText(intent.getStringExtra(EXTRA_STORE_NAME) ?: existingReceipt?.storeName ?: "Jollibee")
         etReceiptDate.setText(intent.getStringExtra(EXTRA_RECEIPT_DATE) ?: existingReceipt?.receiptDate ?: "June 27, 2026")
-        etTotalAmount.setText(intent.getStringExtra(EXTRA_TOTAL_AMOUNT) ?: existingReceipt?.totalAmount?.toString() ?: "250.00")
+        etTotalAmount.setText(
+            displayAmountText(
+                intent.getStringExtra(EXTRA_TOTAL_AMOUNT)?.toDoubleOrNull()
+                    ?: existingReceipt?.totalAmount
+                    ?: 250.00
+            )
+        )
         etCategory.setText(intent.getStringExtra(EXTRA_CATEGORY) ?: existingReceipt?.category ?: "Food")
         tvOcrRawText.text = intent.getStringExtra(EXTRA_RAW_TEXT)?.ifBlank { "No OCR text detected." }
             ?: existingReceipt?.rawText
@@ -69,7 +75,8 @@ class ReviewReceiptActivity : AppCompatActivity() {
             val storeName = etStoreName.text.toString().ifBlank { "Unknown Store" }
             val receiptDate = etReceiptDate.text.toString().ifBlank { "Date not detected" }
             val category = etCategory.text.toString().ifBlank { "Uncategorized" }
-            val totalAmount = etTotalAmount.text.toString().toDoubleOrNull() ?: 0.0
+            val enteredTotalAmount = etTotalAmount.text.toString().toDoubleOrNull() ?: 0.0
+            val totalAmount = MoneyFormatter.toBaseAmount(this, enteredTotalAmount)
             val items = formatLineItemsForStorage()
             val rawText = tvOcrRawText.text.toString()
             val imageUri = intent.getStringExtra(EXTRA_IMAGE_URI) ?: existingImageUri
@@ -135,7 +142,7 @@ class ReviewReceiptActivity : AppCompatActivity() {
         val existingItem = position?.let { lineItemAdapter.currentItems().getOrNull(it) }
 
         etLineItemName.setText(existingItem?.name.orEmpty())
-        etLineItemAmount.setText(existingItem?.amount?.takeIf { it > 0.0 }?.toString().orEmpty())
+        etLineItemAmount.setText(existingItem?.amount?.takeIf { it > 0.0 }?.let { displayAmountText(it) }.orEmpty())
 
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -167,7 +174,7 @@ class ReviewReceiptActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                val item = ReceiptLineItem(name, amount)
+                val item = ReceiptLineItem(name, MoneyFormatter.toBaseAmount(this, amount))
                 if (position == null) {
                     lineItemAdapter.addItem(item)
                 } else {
@@ -184,18 +191,14 @@ class ReviewReceiptActivity : AppCompatActivity() {
         return itemsText.lines()
             .map { it.trim() }
             .filter { it.isNotBlank() }
+            .filterNot { it.equals("No line items detected", ignoreCase = true) }
             .map { line ->
                 val amountMatch = amountPattern.findAll(line).lastOrNull()
-                val amount = amountMatch?.value
-                    ?.replace(",", "")
-                    ?.replace("PHP", "", ignoreCase = true)
-                    ?.replace("EUR", "", ignoreCase = true)
-                    ?.replace("USD", "", ignoreCase = true)
-                    ?.replace("$", "")
-                    ?.replace("P", "", ignoreCase = true)
-                    ?.trim()
-                    ?.toDoubleOrNull()
-                    ?: 0.0
+                val amountText = amountMatch?.value.orEmpty()
+                val amount = MoneyFormatter.toBaseAmount(
+                    MoneyFormatter.currencyFromText(amountText),
+                    MoneyFormatter.parseDisplayAmount(amountText)
+                )
                 val name = amountMatch?.let { line.removeRange(it.range).trim(' ', '-', ':') }
                     ?.ifBlank { line }
                     ?: line
@@ -206,8 +209,12 @@ class ReviewReceiptActivity : AppCompatActivity() {
     private fun formatLineItemsForStorage(): String {
         return lineItemAdapter.currentItems()
             .joinToString("\n") { item ->
-                "${item.name} - ${MoneyFormatter.format(this, item.amount)}"
+                "${item.name} - ${MoneyFormatter.formatAsBaseCurrency(item.amount)}"
             }
+    }
+
+    private fun displayAmountText(amountInPhp: Double): String {
+        return MoneyFormatter.formatInputAmount(this, amountInPhp)
     }
 
     companion object {
@@ -219,6 +226,6 @@ class ReviewReceiptActivity : AppCompatActivity() {
         const val EXTRA_ITEMS = "extra_items"
         const val EXTRA_RAW_TEXT = "extra_raw_text"
         const val EXTRA_IMAGE_URI = "extra_image_uri"
-        private val amountPattern = Regex("""(?:PHP|USD|EUR|P|\$)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})""")
+        private val amountPattern = Regex("""(?:PHP|USD|EUR|P|₱|\$)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})""")
     }
 }

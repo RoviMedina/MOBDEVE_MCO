@@ -12,45 +12,38 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class DashboardActivity : AppCompatActivity() {
+    private lateinit var dbHelper: ReceiptDatabaseHelper
+    private lateinit var receiptAdapter: ReceiptAdapter
+    private lateinit var tvTotalExpenses: TextView
+    private lateinit var tvReceiptCount: TextView
+    private lateinit var tvDashboardBudget: TextView
+    private lateinit var progressDashboardBudget: ProgressBar
+    private lateinit var tvEmptyRecentReceipts: TextView
+    private lateinit var rvRecentReceipts: RecyclerView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.dashboard_activity)
 
-        val dbHelper = ReceiptDatabaseHelper(this)
+        dbHelper = ReceiptDatabaseHelper(this)
+        tvTotalExpenses = findViewById(R.id.tvTotalExpenses)
+        tvReceiptCount = findViewById(R.id.tvReceiptCount)
+        tvDashboardBudget = findViewById(R.id.tvDashboardBudget)
+        progressDashboardBudget = findViewById(R.id.progressDashboardBudget)
+        tvEmptyRecentReceipts = findViewById(R.id.tvEmptyRecentReceipts)
+        rvRecentReceipts = findViewById(R.id.rvRecentReceipts)
 
-        val tvTotalExpenses = findViewById<TextView>(R.id.tvTotalExpenses)
-        val tvReceiptCount = findViewById<TextView>(R.id.tvReceiptCount)
-        val tvDashboardBudget = findViewById<TextView>(R.id.tvDashboardBudget)
-        val progressDashboardBudget = findViewById<ProgressBar>(R.id.progressDashboardBudget)
-        val tvEmptyRecentReceipts = findViewById<TextView>(R.id.tvEmptyRecentReceipts)
-
-        val totalExpenses = dbHelper.getTotalExpenses()
-        val receiptCount = dbHelper.getReceiptCount()
-        val monthlyBudget = getMonthlyBudget()
-        val budgetPercent = budgetPercent(totalExpenses, monthlyBudget)
-
-        tvTotalExpenses.text = MoneyFormatter.format(this, totalExpenses)
-        tvReceiptCount.text = "$receiptCount Receipts This Month"
-        progressDashboardBudget.progress = budgetPercent
-        tvDashboardBudget.text = "Budget used: $budgetPercent% of ${MoneyFormatter.format(this, monthlyBudget)}"
-
-        val receiptAdapter = ReceiptAdapter(emptyList()) { receipt ->
+        receiptAdapter = ReceiptAdapter(emptyList()) { receipt ->
             val intent = Intent(this, ReceiptDetailsActivity::class.java).apply {
                 putExtra(ReceiptDetailsActivity.EXTRA_RECEIPT_ID, receipt.id)
             }
             startActivity(intent)
         }
 
-        findViewById<RecyclerView>(R.id.rvRecentReceipts).apply {
+        rvRecentReceipts.apply {
             layoutManager = LinearLayoutManager(this@DashboardActivity)
             adapter = receiptAdapter
         }
-
-        val recentReceipts = dbHelper.getRecentReceipts(3)
-        receiptAdapter.submitList(recentReceipts)
-
-        tvEmptyRecentReceipts.visibility =
-            if (recentReceipts.isEmpty()) View.VISIBLE else View.GONE
 
         val btnScanReceipt = findViewById<Button>(R.id.btnScanReceipt)
         val btnExpenseHistory = findViewById<Button>(R.id.btnExpenseHistory)
@@ -75,6 +68,33 @@ class DashboardActivity : AppCompatActivity() {
 
         btnProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadDashboardData()
+    }
+
+    private fun loadDashboardData() {
+        val totalExpenses = dbHelper.getTotalExpenses()
+        val receiptCount = dbHelper.getReceiptCount()
+        val monthlyBudget = getMonthlyBudget()
+        val budgetPercent = budgetPercent(totalExpenses, monthlyBudget)
+        val recentReceipts = dbHelper.getRecentReceipts(3)
+
+        tvTotalExpenses.text = MoneyFormatter.format(this, totalExpenses)
+        tvReceiptCount.text = "$receiptCount Receipts This Month"
+        progressDashboardBudget.progress = budgetPercent
+        tvDashboardBudget.text = "Budget used: $budgetPercent% of ${MoneyFormatter.format(this, monthlyBudget)}"
+        receiptAdapter.submitList(recentReceipts)
+
+        if (recentReceipts.isEmpty()) {
+            tvEmptyRecentReceipts.visibility = View.VISIBLE
+            rvRecentReceipts.visibility = View.GONE
+        } else {
+            tvEmptyRecentReceipts.visibility = View.GONE
+            rvRecentReceipts.visibility = View.VISIBLE
         }
     }
 

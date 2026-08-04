@@ -24,16 +24,20 @@ class BudgetSettingsActivity : AppCompatActivity() {
         tilMonthlyBudget.prefixText = MoneyFormatter.prefix(this)
         tvBudgetExamples.text = buildBudgetExampleText()
 
+        val savedBudget = prefs.getString("monthly_budget", "5000.00")
+            ?.toDoubleOrNull()
+            ?: 5000.00
         etMonthlyBudget.setText(
-            prefs.getString("monthly_budget", "5000.00")
+            MoneyFormatter.formatInputAmount(this, savedBudget)
         )
 
         btnSaveBudget.setOnClickListener {
 
-            val budget = etMonthlyBudget.text.toString()
+            val enteredBudget = etMonthlyBudget.text.toString().toDoubleOrNull() ?: 0.0
+            val budgetInPhp = MoneyFormatter.toBaseAmount(this, enteredBudget)
 
             prefs.edit()
-                .putString("monthly_budget", budget)
+                .putString("monthly_budget", budgetInPhp.toString())
                 .apply()
 
             Toast.makeText(

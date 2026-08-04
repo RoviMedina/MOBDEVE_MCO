@@ -20,26 +20,26 @@ class ReceiptLineItemAdapter(
     }
 
     override fun onBindViewHolder(holder: LineItemViewHolder, position: Int) {
-        holder.bind(items[position], position)
+        holder.bind(items[position])
     }
 
     override fun getItemCount(): Int = items.size
 
     fun addItem(item: ReceiptLineItem) {
         items.add(item)
-        notifyItemInserted(items.lastIndex)
+        notifyDataSetChanged()
     }
 
     fun updateItem(position: Int, item: ReceiptLineItem) {
         if (position !in items.indices) return
         items[position] = item
-        notifyItemChanged(position)
+        notifyDataSetChanged()
     }
 
     fun deleteItem(position: Int) {
         if (position !in items.indices) return
         items.removeAt(position)
-        notifyItemRemoved(position)
+        notifyDataSetChanged()
     }
 
     fun currentItems(): List<ReceiptLineItem> = items
@@ -50,11 +50,21 @@ class ReceiptLineItemAdapter(
         private val btnEditLineItem: Button = itemView.findViewById(R.id.btnEditLineItem)
         private val btnDeleteLineItem: Button = itemView.findViewById(R.id.btnDeleteLineItem)
 
-        fun bind(item: ReceiptLineItem, position: Int) {
+        fun bind(item: ReceiptLineItem) {
             tvLineItemName.text = item.name
             tvLineItemAmount.text = MoneyFormatter.format(itemView.context, item.amount)
-            btnEditLineItem.setOnClickListener { onEditClick(position) }
-            btnDeleteLineItem.setOnClickListener { onDeleteClick(position) }
+            btnEditLineItem.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onEditClick(position)
+                }
+            }
+            btnDeleteLineItem.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onDeleteClick(position)
+                }
+            }
         }
     }
 }
