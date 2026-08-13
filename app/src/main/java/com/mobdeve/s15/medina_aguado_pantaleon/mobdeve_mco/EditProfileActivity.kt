@@ -49,7 +49,12 @@ class EditProfileActivity : AppCompatActivity() {
         val email = etProfileEmail.text.toString().trim()
 
         if (name.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please fill out missing field.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (currentUserId == -1L) {
+            Toast.makeText(this, "Session error. Please log in again.", Toast.LENGTH_SHORT).show()
             return
         }
 
