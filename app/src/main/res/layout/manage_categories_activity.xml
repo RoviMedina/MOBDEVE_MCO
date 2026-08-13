@@ -28,43 +28,17 @@
             android:textColor="@color/textSecondary"
             android:textSize="15sp" />
 
-        <com.google.android.material.card.MaterialCardView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCategories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="2dp">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvCategories"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilNewCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="New Category"
-            app:boxBackgroundMode="filled"
-            app:boxCornerRadiusBottomEnd="18dp"
-            app:boxCornerRadiusBottomStart="18dp"
-            app:boxCornerRadiusTopEnd="18dp"
-            app:boxCornerRadiusTopStart="18dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etNewCategory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:nestedScrollingEnabled="false" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddCategory"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="18dp"
             android:text="Add Category"
             android:textAllCaps="false"
             app:cornerRadius="18dp" />
