@@ -22,7 +22,6 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -41,6 +40,7 @@ class ReportsActivity : AppCompatActivity() {
 
     private var receipts: List<Receipt> = emptyList()
     private var monthOptions: List<MonthOption> = emptyList()
+    private var categoryColorMap: Map<String, Int> = emptyMap()
     private var selectedMonthKey: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +73,7 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun loadReportData() {
         receipts = receiptDatabaseHelper.getAllReceipts()
+        categoryColorMap = receiptDatabaseHelper.getCategoryColorMap()
         monthOptions = buildMonthOptions(receipts)
 
         if (monthOptions.isEmpty()) {
@@ -148,7 +149,7 @@ class ReportsActivity : AppCompatActivity() {
 
         setupPieChart(categoryTotals, selectedMonthLabel)
         setupBarChart(dateTotals)
-        reportCategoryAdapter.submitList(categoryTotals, totalExpenses)
+        reportCategoryAdapter.submitList(categoryTotals, totalExpenses, categoryColorMap)
     }
 
     private fun setupPieChart(categoryTotals: List<Pair<String, Double>>, selectedMonthLabel: String) {
@@ -164,7 +165,7 @@ class ReportsActivity : AppCompatActivity() {
         }
 
         val dataSet = PieDataSet(entries, "").apply {
-            colors = chartColors
+            colors = colorsForCategories(categoryTotals)
             valueTextColor = Color.WHITE
             valueTextSize = 12f
             sliceSpace = 2f
@@ -198,7 +199,7 @@ class ReportsActivity : AppCompatActivity() {
         }
 
         val dataSet = BarDataSet(entries, "Expenses").apply {
-            colors = chartColors
+            colors = listOf(Color.rgb(103, 80, 164))
             valueTextColor = Color.DKGRAY
             valueTextSize = 11f
         }
@@ -316,6 +317,12 @@ class ReportsActivity : AppCompatActivity() {
             .coerceIn(0, 100)
     }
 
+    private fun colorsForCategories(categoryTotals: List<Pair<String, Double>>): List<Int> {
+        return categoryTotals.map { (category, _) ->
+            categoryColorMap[category] ?: ReceiptDatabaseHelper.fallbackCategoryColor
+        }
+    }
+
     private data class MonthOption(
         val key: String,
         val label: String,
@@ -324,14 +331,6 @@ class ReportsActivity : AppCompatActivity() {
 
     companion object {
         private const val CHART_ANIMATION_MS = 700
-        private val chartColors = listOf(
-            Color.rgb(103, 80, 164),
-            Color.rgb(76, 175, 80),
-            Color.rgb(244, 67, 54),
-            Color.rgb(33, 150, 243),
-            Color.rgb(255, 193, 7),
-            Color.rgb(0, 150, 136)
-        ) + ColorTemplate.MATERIAL_COLORS.toList()
 
         private val monthKeyFormat = SimpleDateFormat("yyyy-MM", Locale.US)
         private val monthLabelFormat = SimpleDateFormat("MMMM yyyy", Locale.US)

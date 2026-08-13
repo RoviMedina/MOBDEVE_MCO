@@ -284,6 +284,7 @@ class ReceiptDatabaseHelper(context: Context) :
     }
 
     fun updateCategory(id: Long, name: String, color: Int): Boolean {
+        val oldName = getCategoryById(id)?.name
         val values = ContentValues().apply {
             put(COL_CATEGORY_NAME, name)
             put(COL_CATEGORY_COLOR, color)
@@ -295,16 +296,55 @@ class ReceiptDatabaseHelper(context: Context) :
             "$COL_CATEGORY_ID = ?",
             arrayOf(id.toString())
         )
+        if (rowsUpdated > 0 && oldName != null && !oldName.equals(name, ignoreCase = true)) {
+            updateReceiptsCategory(oldName, name)
+        }
         return rowsUpdated > 0
     }
 
     fun deleteCategory(id: Long): Boolean {
+        val category = getCategoryById(id)
         val rowsDeleted = writableDatabase.delete(
             TABLE_CATEGORIES,
             "$COL_CATEGORY_ID = ?",
             arrayOf(id.toString())
         )
+        if (rowsDeleted > 0 && category != null) {
+            updateReceiptsCategory(category.name, NONE_CATEGORY)
+        }
         return rowsDeleted > 0
+    }
+
+    fun getCategoryColorMap(): Map<String, Int> {
+        return getAllCategories().associate { category ->
+            category.name to category.color
+        } + (NONE_CATEGORY to fallbackCategoryColor)
+    }
+
+    private fun getCategoryById(id: Long): Category? {
+        readableDatabase.query(
+            TABLE_CATEGORIES,
+            null,
+            "$COL_CATEGORY_ID = ?",
+            arrayOf(id.toString()),
+            null,
+            null,
+            null
+        ).use { cursor ->
+            return if (cursor.moveToFirst()) cursor.toCategory() else null
+        }
+    }
+
+    private fun updateReceiptsCategory(oldName: String, newName: String) {
+        val values = ContentValues().apply {
+            put(COL_CATEGORY, newName)
+        }
+        writableDatabase.update(
+            TABLE_RECEIPTS,
+            values,
+            "$COL_CATEGORY = ?",
+            arrayOf(oldName)
+        )
     }
 
     private fun queryReceipts(selection: String?, selectionArgs: Array<String>?): List<Receipt> {
@@ -451,5 +491,7 @@ class ReceiptDatabaseHelper(context: Context) :
             Color.rgb(239, 108, 0),
             Color.rgb(198, 40, 40)
         )
+        const val NONE_CATEGORY = "None"
+        val fallbackCategoryColor: Int = Color.rgb(117, 117, 117)
     }
 }

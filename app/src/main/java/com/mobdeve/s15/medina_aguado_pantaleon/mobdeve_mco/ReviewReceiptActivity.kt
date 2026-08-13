@@ -2,8 +2,10 @@ package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -29,11 +31,24 @@ class ReviewReceiptActivity : AppCompatActivity() {
         val etStoreName = findViewById<EditText>(R.id.etStoreName)
         val etReceiptDate = findViewById<EditText>(R.id.etReceiptDate)
         val etTotalAmount = findViewById<EditText>(R.id.etTotalAmount)
-        val etCategory = findViewById<EditText>(R.id.etCategory)
+        val spinnerCategory = findViewById<Spinner>(R.id.spinnerCategory)
         val tvOcrRawText = findViewById<TextView>(R.id.tvOcrRawText)
 
         val existingReceipt = receiptDatabaseHelper.getReceiptById(editingReceiptId)
         existingImageUri = existingReceipt?.imageUri
+        val selectedCategory = intent.getStringExtra(EXTRA_CATEGORY)
+            ?: existingReceipt?.category
+            ?: ReceiptDatabaseHelper.NONE_CATEGORY
+        val categoryOptions = categoryOptions(selectedCategory)
+        spinnerCategory.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            categoryOptions
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        spinnerCategory.setSelection(categoryOptions.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0)
+
         val initialItemText = intent.getStringExtra(EXTRA_ITEMS)
             ?: existingReceipt?.items
             ?: ""
@@ -47,7 +62,6 @@ class ReviewReceiptActivity : AppCompatActivity() {
             else -> ""
         }
         etTotalAmount.setText(totalAmountText)
-        etCategory.setText(intent.getStringExtra(EXTRA_CATEGORY) ?: existingReceipt?.category.orEmpty())
         tvOcrRawText.text = intent.getStringExtra(EXTRA_RAW_TEXT)?.ifBlank { "No OCR text detected." }
             ?: existingReceipt?.rawText
             ?: "OCR raw text will appear here after scanning."
@@ -74,7 +88,7 @@ class ReviewReceiptActivity : AppCompatActivity() {
         btnSaveReceipt.setOnClickListener {
             val storeName = etStoreName.text.toString().ifBlank { "Unknown Store" }
             val receiptDate = etReceiptDate.text.toString().ifBlank { "Date not detected" }
-            val category = etCategory.text.toString().ifBlank { "Uncategorized" }
+            val category = spinnerCategory.selectedItem?.toString() ?: ReceiptDatabaseHelper.NONE_CATEGORY
             val enteredTotalAmount = etTotalAmount.text.toString().toDoubleOrNull() ?: 0.0
             val totalAmount = MoneyFormatter.toBaseAmount(this, enteredTotalAmount)
             val items = formatLineItemsForStorage()
@@ -130,6 +144,20 @@ class ReviewReceiptActivity : AppCompatActivity() {
 
     private fun isEditMode(): Boolean {
         return editingReceiptId != -1L
+    }
+
+    private fun categoryOptions(selectedCategory: String): List<String> {
+        val categoryNames = receiptDatabaseHelper.getAllCategories()
+            .map { it.name }
+            .toMutableList()
+
+        if (categoryNames.isEmpty()) {
+            categoryNames.add(ReceiptDatabaseHelper.NONE_CATEGORY)
+        } else if (selectedCategory == ReceiptDatabaseHelper.NONE_CATEGORY && !categoryNames.contains(selectedCategory)) {
+            categoryNames.add(0, selectedCategory)
+        }
+
+        return categoryNames
     }
 
     private fun showLineItemDialog(position: Int? = null) {

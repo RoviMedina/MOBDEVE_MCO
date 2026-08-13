@@ -12,6 +12,7 @@ class ReportCategoryAdapter :
 
     private var categories: List<Pair<String, Double>> = emptyList()
     private var monthlyTotal: Double = 0.0
+    private var categoryColors: Map<String, Int> = emptyMap()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportCategoryViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -27,14 +28,20 @@ class ReportCategoryAdapter :
         return categories.size
     }
 
-    fun submitList(updatedCategories: List<Pair<String, Double>>, updatedMonthlyTotal: Double) {
+    fun submitList(
+        updatedCategories: List<Pair<String, Double>>,
+        updatedMonthlyTotal: Double,
+        updatedCategoryColors: Map<String, Int>
+    ) {
         categories = updatedCategories
         monthlyTotal = updatedMonthlyTotal
+        categoryColors = updatedCategoryColors
         notifyDataSetChanged()
     }
 
     inner class ReportCategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvReportCategory: TextView = itemView.findViewById(R.id.tvReportCategory)
+        private val tvReportCategoryColor: TextView = itemView.findViewById(R.id.tvReportCategoryColor)
         private val tvReportPercent: TextView = itemView.findViewById(R.id.tvReportPercent)
         private val tvReportAmount: TextView = itemView.findViewById(R.id.tvReportAmount)
 
@@ -45,6 +52,9 @@ class ReportCategoryAdapter :
                 0.0
             }
 
+            tvReportCategoryColor.setBackgroundColor(
+                categoryColors[categoryTotal.first] ?: ReceiptDatabaseHelper.fallbackCategoryColor
+            )
             tvReportCategory.text = categoryTotal.first
             tvReportPercent.text = String.format(Locale.US, "%.0f%%", percent)
             tvReportAmount.text = MoneyFormatter.format(itemView.context, categoryTotal.second)

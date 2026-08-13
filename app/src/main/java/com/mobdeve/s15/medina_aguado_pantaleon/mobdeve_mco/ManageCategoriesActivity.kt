@@ -100,9 +100,18 @@ class ManageCategoriesActivity : AppCompatActivity() {
 
     private fun changeCategoryColor(position: Int) {
         val category = categories.getOrNull(position) ?: return
-        val nextColor = nextColorAfter(category.color)
-        receiptDatabaseHelper.updateCategory(category.id, category.name, nextColor)
-        loadCategories()
+        val colors = ReceiptDatabaseHelper.categoryColors
+        val currentIndex = colors.indexOf(category.color).takeIf { it >= 0 } ?: 0
+
+        AlertDialog.Builder(this)
+            .setTitle("Choose Color")
+            .setSingleChoiceItems(colorNames, currentIndex) { dialog, selectedIndex ->
+                receiptDatabaseHelper.updateCategory(category.id, category.name, colors[selectedIndex])
+                loadCategories()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun confirmDelete(position: Int) {
@@ -110,7 +119,7 @@ class ManageCategoriesActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle("Delete Category")
-            .setMessage("Delete ${category.name}?")
+            .setMessage("Delete ${category.name}? Receipts using this category will be moved to None.")
             .setNegativeButton("Cancel", null)
             .setPositiveButton("Delete") { _, _ ->
                 receiptDatabaseHelper.deleteCategory(category.id)
@@ -125,9 +134,7 @@ class ManageCategoriesActivity : AppCompatActivity() {
         categoryAdapter.replaceItems(categories)
     }
 
-    private fun nextColorAfter(currentColor: Int): Int {
-        val colors = ReceiptDatabaseHelper.categoryColors
-        val currentIndex = colors.indexOf(currentColor).takeIf { it >= 0 } ?: 0
-        return colors[(currentIndex + 1) % colors.size]
+    companion object {
+        private val colorNames = arrayOf("Purple", "Green", "Blue", "Orange", "Red")
     }
 }
