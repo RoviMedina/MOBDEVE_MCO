@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- TODO: Create BudgetSettingsActivity.kt and connect it from Dashboard or Profile. -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,31 +28,36 @@
             android:textColor="@color/textSecondary"
             android:textSize="15sp" />
 
-        <!-- TODO: Save monthly budget limits and show budget progress on Dashboard/Reports. -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilMonthlyBudget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Monthly Budget"
-            app:boxBackgroundMode="filled"
-            app:prefixText="PHP ">
+            app:boxBackgroundMode="filled">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etMonthlyBudget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:text="5000.00" />
+                android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
+            android:id="@+id/tvBudgetExamples"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:background="#EEEEEE"
-            android:padding="16dp"
-            android:text="Food: PHP 2,000\nTransportation: PHP 1,000\nSchool: PHP 1,500\nCoffee: PHP 500"
+            android:text="Category Budgets"
             android:textColor="@color/textPrimary"
-            android:textSize="16sp" />
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/layoutCategoryBudgets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSaveBudget"

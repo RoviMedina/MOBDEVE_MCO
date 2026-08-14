@@ -2,8 +2,10 @@ package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -11,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
-import java.util.Locale
+import com.google.android.material.textfield.TextInputLayout
 
 class ReviewReceiptActivity : AppCompatActivity() {
     private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
@@ -29,19 +31,37 @@ class ReviewReceiptActivity : AppCompatActivity() {
         val etStoreName = findViewById<EditText>(R.id.etStoreName)
         val etReceiptDate = findViewById<EditText>(R.id.etReceiptDate)
         val etTotalAmount = findViewById<EditText>(R.id.etTotalAmount)
-        val etCategory = findViewById<EditText>(R.id.etCategory)
+        val spinnerCategory = findViewById<Spinner>(R.id.spinnerCategory)
         val tvOcrRawText = findViewById<TextView>(R.id.tvOcrRawText)
 
         val existingReceipt = receiptDatabaseHelper.getReceiptById(editingReceiptId)
         existingImageUri = existingReceipt?.imageUri
+        val selectedCategory = intent.getStringExtra(EXTRA_CATEGORY)
+            ?: existingReceipt?.category
+            ?: ReceiptDatabaseHelper.NONE_CATEGORY
+        val categoryOptions = categoryOptions(selectedCategory)
+        spinnerCategory.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            categoryOptions
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        spinnerCategory.setSelection(categoryOptions.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0)
+
         val initialItemText = intent.getStringExtra(EXTRA_ITEMS)
             ?: existingReceipt?.items
-            ?: "Chickenjoy - PHP 120.00\nBurger Steak - PHP 100.00\nDrink - PHP 30.00"
+            ?: ""
 
-        etStoreName.setText(intent.getStringExtra(EXTRA_STORE_NAME) ?: existingReceipt?.storeName ?: "Jollibee")
-        etReceiptDate.setText(intent.getStringExtra(EXTRA_RECEIPT_DATE) ?: existingReceipt?.receiptDate ?: "June 27, 2026")
-        etTotalAmount.setText(intent.getStringExtra(EXTRA_TOTAL_AMOUNT) ?: existingReceipt?.totalAmount?.toString() ?: "250.00")
-        etCategory.setText(intent.getStringExtra(EXTRA_CATEGORY) ?: existingReceipt?.category ?: "Food")
+        etStoreName.setText(intent.getStringExtra(EXTRA_STORE_NAME) ?: existingReceipt?.storeName.orEmpty())
+        etReceiptDate.setText(intent.getStringExtra(EXTRA_RECEIPT_DATE) ?: existingReceipt?.receiptDate.orEmpty())
+        val scannedTotal = intent.getStringExtra(EXTRA_TOTAL_AMOUNT)?.toDoubleOrNull()
+        val totalAmountText = when {
+            scannedTotal != null -> displayAmountText(scannedTotal)
+            existingReceipt != null -> displayAmountText(existingReceipt.totalAmount)
+            else -> ""
+        }
+        etTotalAmount.setText(totalAmountText)
         tvOcrRawText.text = intent.getStringExtra(EXTRA_RAW_TEXT)?.ifBlank { "No OCR text detected." }
             ?: existingReceipt?.rawText
             ?: "OCR raw text will appear here after scanning."
@@ -68,8 +88,9 @@ class ReviewReceiptActivity : AppCompatActivity() {
         btnSaveReceipt.setOnClickListener {
             val storeName = etStoreName.text.toString().ifBlank { "Unknown Store" }
             val receiptDate = etReceiptDate.text.toString().ifBlank { "Date not detected" }
-            val category = etCategory.text.toString().ifBlank { "Uncategorized" }
-            val totalAmount = etTotalAmount.text.toString().toDoubleOrNull() ?: 0.0
+            val category = spinnerCategory.selectedItem?.toString() ?: ReceiptDatabaseHelper.NONE_CATEGORY
+            val enteredTotalAmount = etTotalAmount.text.toString().toDoubleOrNull() ?: 0.0
+            val totalAmount = MoneyFormatter.toBaseAmount(this, enteredTotalAmount)
             val items = formatLineItemsForStorage()
             val rawText = tvOcrRawText.text.toString()
             val imageUri = intent.getStringExtra(EXTRA_IMAGE_URI) ?: existingImageUri
@@ -125,50 +146,87 @@ class ReviewReceiptActivity : AppCompatActivity() {
         return editingReceiptId != -1L
     }
 
+    private fun categoryOptions(selectedCategory: String): List<String> {
+        val categoryNames = receiptDatabaseHelper.getAllCategories()
+            .map { it.name }
+            .toMutableList()
+
+        if (categoryNames.isEmpty()) {
+            categoryNames.add(ReceiptDatabaseHelper.NONE_CATEGORY)
+        } else if (selectedCategory == ReceiptDatabaseHelper.NONE_CATEGORY && !categoryNames.contains(selectedCategory)) {
+            categoryNames.add(0, selectedCategory)
+        }
+
+        return categoryNames
+    }
+
     private fun showLineItemDialog(position: Int? = null) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_line_item, null)
+        val tilLineItemName = dialogView.findViewById<TextInputLayout>(R.id.tilLineItemName)
+        val tilLineItemAmount = dialogView.findViewById<TextInputLayout>(R.id.tilLineItemAmount)
+        tilLineItemAmount.prefixText = MoneyFormatter.prefix(this)
         val etLineItemName = dialogView.findViewById<TextInputEditText>(R.id.etLineItemName)
         val etLineItemAmount = dialogView.findViewById<TextInputEditText>(R.id.etLineItemAmount)
         val existingItem = position?.let { lineItemAdapter.currentItems().getOrNull(it) }
 
         etLineItemName.setText(existingItem?.name.orEmpty())
-        etLineItemAmount.setText(existingItem?.amount?.takeIf { it > 0.0 }?.toString().orEmpty())
+        etLineItemAmount.setText(existingItem?.amount?.takeIf { it > 0.0 }?.let { displayAmountText(it) }.orEmpty())
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .setNegativeButton("Cancel", null)
-            .setPositiveButton(if (position == null) "Add" else "Update") { _, _ ->
+            .setPositiveButton(if (position == null) "Add" else "Update", null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                tilLineItemName.error = null
+                tilLineItemAmount.error = null
+
                 val name = etLineItemName.text?.toString()?.trim().orEmpty()
-                val amount = etLineItemAmount.text?.toString()?.toDoubleOrNull() ?: 0.0
+                val amountText = etLineItemAmount.text?.toString()?.trim().orEmpty()
+                val amount = amountText.toDoubleOrNull()
 
                 if (name.isBlank()) {
-                    Toast.makeText(this, "Item name is required.", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    tilLineItemName.error = "Item name is required"
+                    return@setOnClickListener
                 }
 
-                val item = ReceiptLineItem(name, amount)
+                if (amountText.isBlank()) {
+                    tilLineItemAmount.error = "Amount is required"
+                    return@setOnClickListener
+                }
+
+                if (amount == null || amount < 0.0) {
+                    tilLineItemAmount.error = "Enter a valid amount"
+                    return@setOnClickListener
+                }
+
+                val item = ReceiptLineItem(name, MoneyFormatter.toBaseAmount(this, amount))
                 if (position == null) {
                     lineItemAdapter.addItem(item)
                 } else {
                     lineItemAdapter.updateItem(position, item)
                 }
+                dialog.dismiss()
             }
-            .show()
+        }
+
+        dialog.show()
     }
 
     private fun parseLineItems(itemsText: String): List<ReceiptLineItem> {
         return itemsText.lines()
             .map { it.trim() }
             .filter { it.isNotBlank() }
+            .filterNot { it.equals("No line items detected", ignoreCase = true) }
             .map { line ->
                 val amountMatch = amountPattern.findAll(line).lastOrNull()
-                val amount = amountMatch?.value
-                    ?.replace(",", "")
-                    ?.replace("PHP", "", ignoreCase = true)
-                    ?.replace("P", "", ignoreCase = true)
-                    ?.trim()
-                    ?.toDoubleOrNull()
-                    ?: 0.0
+                val amountText = amountMatch?.value.orEmpty()
+                val amount = MoneyFormatter.toBaseAmount(
+                    MoneyFormatter.currencyFromText(amountText),
+                    MoneyFormatter.parseDisplayAmount(amountText)
+                )
                 val name = amountMatch?.let { line.removeRange(it.range).trim(' ', '-', ':') }
                     ?.ifBlank { line }
                     ?: line
@@ -179,8 +237,12 @@ class ReviewReceiptActivity : AppCompatActivity() {
     private fun formatLineItemsForStorage(): String {
         return lineItemAdapter.currentItems()
             .joinToString("\n") { item ->
-                String.format(Locale.US, "%s - PHP %.2f", item.name, item.amount)
+                "${item.name} - ${MoneyFormatter.formatAsBaseCurrency(item.amount)}"
             }
+    }
+
+    private fun displayAmountText(amountInPhp: Double): String {
+        return MoneyFormatter.formatInputAmount(this, amountInPhp)
     }
 
     companion object {
@@ -192,6 +254,6 @@ class ReviewReceiptActivity : AppCompatActivity() {
         const val EXTRA_ITEMS = "extra_items"
         const val EXTRA_RAW_TEXT = "extra_raw_text"
         const val EXTRA_IMAGE_URI = "extra_image_uri"
-        private val amountPattern = Regex("""(?:PHP|P)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})""")
+        private val amountPattern = Regex("""(?:PHP|USD|EUR|P|₱|\$)?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})""")
     }
 }

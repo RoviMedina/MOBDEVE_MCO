@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import java.util.Locale
 
 class ReceiptAdapter(
     private var receipts: List<Receipt>,
@@ -37,7 +36,7 @@ class ReceiptAdapter(
         fun bind(receipt: Receipt) {
             tvReceiptStore.text = receipt.storeName
             tvReceiptMeta.text = "${receipt.category} - ${receipt.receiptDate}"
-            tvReceiptAmount.text = String.format(Locale.US, "PHP %.2f", receipt.totalAmount)
+            tvReceiptAmount.text = MoneyFormatter.format(itemView.context, receipt.totalAmount)
             itemView.setOnClickListener { onReceiptClick(receipt) }
         }
     }

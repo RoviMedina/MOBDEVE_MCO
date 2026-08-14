@@ -1,10 +1,10 @@
 package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
 
@@ -22,19 +22,18 @@ class ProfileActivity : AppCompatActivity() {
         dbHelper = ReceiptDatabaseHelper(this)
         sessionManager = SessionManager(this)
 
-        // Ensure we have a user session for this demo
-        dbHelper.ensureDefaultUser(sessionManager)
-
         tvProfileName = findViewById(R.id.tvProfileName)
         tvProfileEmail = findViewById(R.id.tvProfileEmail)
+        val btnEditProfile = findViewById<Button>(R.id.btnEditProfile)
 
-        findViewById<Button>(R.id.btnEditProfile).setOnClickListener {
+        btnEditProfile.setOnClickListener {
             val intent = Intent(this, EditProfileActivity::class.java)
             startActivity(intent)
         }
 
         findViewById<Button>(R.id.btnManageCategories).setOnClickListener {
-            Toast.makeText(this, "TODO: Build category management screen.", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ManageCategoriesActivity::class.java)
+            startActivity(intent)
         }
 
         findViewById<Button>(R.id.btnCurrency).setOnClickListener {
@@ -57,6 +56,12 @@ class ProfileActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnLogout).setOnClickListener {
             sessionManager.clearSession()
+            getSharedPreferences("account", Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("is_logged_in", false)
+                .putBoolean("is_guest", false)
+                .apply()
+
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
@@ -70,6 +75,27 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun loadUserData() {
+        val accountPrefs = getSharedPreferences("account", Context.MODE_PRIVATE)
+        val isGuest = accountPrefs.getBoolean("is_guest", false)
+        if (isGuest) {
+            tvProfileName.text = "Guest User"
+            tvProfileEmail.text = "Guest session"
+            findViewById<Button>(R.id.btnEditProfile).isEnabled = false
+            return
+        }
+
+        val savedName = accountPrefs.getString("name", null)
+        val savedEmail = accountPrefs.getString("email", null)
+        if (!savedName.isNullOrBlank() && !savedEmail.isNullOrBlank()) {
+            tvProfileName.text = savedName
+            tvProfileEmail.text = savedEmail
+            findViewById<Button>(R.id.btnEditProfile).isEnabled = true
+            return
+        }
+
+        dbHelper.ensureDefaultUser(sessionManager)
+        findViewById<Button>(R.id.btnEditProfile).isEnabled = true
+
         val userId = sessionManager.getUserId()
         if (userId != -1L) {
             val user = dbHelper.getUserById(userId)

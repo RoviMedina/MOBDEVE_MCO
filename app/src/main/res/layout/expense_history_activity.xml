@@ -50,15 +50,11 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/tvEmptyReceipts"
+    <include
+        android:id="@+id/emptyReceiptsState"
+        layout="@layout/empty_receipts_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="32dp"
-        android:text="No receipts found."
-        android:textColor="@color/textSecondary"
-        android:textSize="16sp"
         android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView

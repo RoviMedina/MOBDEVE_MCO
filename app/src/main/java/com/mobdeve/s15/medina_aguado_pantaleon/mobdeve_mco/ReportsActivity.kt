@@ -1,12 +1,14 @@
 package com.mobdeve.s15.medina_aguado_pantaleon.mobdeve_mco
 
 import android.graphics.Color
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +22,6 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -33,10 +34,13 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var barMonthlySpending: BarChart
     private lateinit var tvMonthlyTotal: TextView
     private lateinit var tvHighestCategory: TextView
+    private lateinit var tvReportBudgetProgress: TextView
+    private lateinit var progressReportBudget: ProgressBar
     private lateinit var reportCategoryAdapter: ReportCategoryAdapter
 
     private var receipts: List<Receipt> = emptyList()
     private var monthOptions: List<MonthOption> = emptyList()
+    private var categoryColorMap: Map<String, Int> = emptyMap()
     private var selectedMonthKey: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +53,8 @@ class ReportsActivity : AppCompatActivity() {
         barMonthlySpending = findViewById(R.id.barMonthlySpending)
         tvMonthlyTotal = findViewById(R.id.tvMonthlyTotal)
         tvHighestCategory = findViewById(R.id.tvHighestCategory)
+        tvReportBudgetProgress = findViewById(R.id.tvReportBudgetProgress)
+        progressReportBudget = findViewById(R.id.progressReportBudget)
         reportCategoryAdapter = ReportCategoryAdapter()
 
         findViewById<RecyclerView>(R.id.rvReportCategories).apply {
@@ -67,6 +73,7 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun loadReportData() {
         receipts = receiptDatabaseHelper.getAllReceipts()
+        categoryColorMap = receiptDatabaseHelper.getCategoryColorMap()
         monthOptions = buildMonthOptions(receipts)
 
         if (monthOptions.isEmpty()) {
@@ -126,17 +133,23 @@ class ReportsActivity : AppCompatActivity() {
             .toList()
             .sortedBy { it.first }
 
-        tvMonthlyTotal.text = String.format(Locale.US, "Total for %s\nPHP %.2f", selectedMonthLabel, totalExpenses)
+        val monthlyBudget = getMonthlyBudget()
+        val budgetPercent = budgetPercent(totalExpenses, monthlyBudget)
+
+        tvMonthlyTotal.text = "Total for $selectedMonthLabel\n${MoneyFormatter.format(this, totalExpenses)}"
         tvHighestCategory.text = if (categoryTotals.isEmpty()) {
             "Highest Category\nNone"
         } else {
             val highestCategory = categoryTotals.first()
-            String.format(Locale.US, "Highest Category\n%s - PHP %.2f", highestCategory.first, highestCategory.second)
+            "Highest Category\n${highestCategory.first} - ${MoneyFormatter.format(this, highestCategory.second)}"
         }
+        progressReportBudget.progress = budgetPercent
+        tvReportBudgetProgress.text =
+            "Budget Progress\n$budgetPercent% of ${MoneyFormatter.format(this, monthlyBudget)}"
 
         setupPieChart(categoryTotals, selectedMonthLabel)
         setupBarChart(dateTotals)
-        reportCategoryAdapter.submitList(categoryTotals, totalExpenses)
+        reportCategoryAdapter.submitList(categoryTotals, totalExpenses, categoryColorMap)
     }
 
     private fun setupPieChart(categoryTotals: List<Pair<String, Double>>, selectedMonthLabel: String) {
@@ -152,7 +165,7 @@ class ReportsActivity : AppCompatActivity() {
         }
 
         val dataSet = PieDataSet(entries, "").apply {
-            colors = chartColors
+            colors = colorsForCategories(categoryTotals)
             valueTextColor = Color.WHITE
             valueTextSize = 12f
             sliceSpace = 2f
@@ -186,7 +199,7 @@ class ReportsActivity : AppCompatActivity() {
         }
 
         val dataSet = BarDataSet(entries, "Expenses").apply {
-            colors = chartColors
+            colors = listOf(Color.rgb(103, 80, 164))
             valueTextColor = Color.DKGRAY
             valueTextSize = 11f
         }
@@ -274,6 +287,42 @@ class ReportsActivity : AppCompatActivity() {
         }.getOrNull()
     }
 
+    private fun getMonthlyBudget(): Double {
+        return getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getString("monthly_budget_${accountKey()}", null)
+            ?.toDoubleOrNull()
+            ?: 0.00
+    }
+
+    private fun accountKey(): String {
+        val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("is_guest", false)) {
+            return "guest"
+        }
+
+        return prefs.getString("email", null)
+            ?.trim()
+            ?.lowercase(Locale.US)
+            ?.takeIf { it.isNotBlank() }
+            ?: "legacy"
+    }
+
+    private fun budgetPercent(totalExpenses: Double, monthlyBudget: Double): Int {
+        if (monthlyBudget <= 0.0) {
+            return 0
+        }
+
+        return ((totalExpenses / monthlyBudget) * 100)
+            .toInt()
+            .coerceIn(0, 100)
+    }
+
+    private fun colorsForCategories(categoryTotals: List<Pair<String, Double>>): List<Int> {
+        return categoryTotals.map { (category, _) ->
+            categoryColorMap[category] ?: ReceiptDatabaseHelper.fallbackCategoryColor
+        }
+    }
+
     private data class MonthOption(
         val key: String,
         val label: String,
@@ -282,14 +331,6 @@ class ReportsActivity : AppCompatActivity() {
 
     companion object {
         private const val CHART_ANIMATION_MS = 700
-        private val chartColors = listOf(
-            Color.rgb(103, 80, 164),
-            Color.rgb(76, 175, 80),
-            Color.rgb(244, 67, 54),
-            Color.rgb(33, 150, 243),
-            Color.rgb(255, 193, 7),
-            Color.rgb(0, 150, 136)
-        ) + ColorTemplate.MATERIAL_COLORS.toList()
 
         private val monthKeyFormat = SimpleDateFormat("yyyy-MM", Locale.US)
         private val monthLabelFormat = SimpleDateFormat("MMMM yyyy", Locale.US)

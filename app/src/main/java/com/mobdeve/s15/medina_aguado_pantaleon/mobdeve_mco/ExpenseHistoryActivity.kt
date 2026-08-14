@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.TextView
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +14,7 @@ import com.google.android.material.textfield.TextInputEditText
 class ExpenseHistoryActivity : AppCompatActivity() {
     private lateinit var receiptDatabaseHelper: ReceiptDatabaseHelper
     private lateinit var receiptAdapter: ReceiptAdapter
-    private lateinit var tvEmptyReceipts: TextView
+    private lateinit var emptyReceiptsState: View
     private lateinit var rvReceipts: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +22,10 @@ class ExpenseHistoryActivity : AppCompatActivity() {
         setContentView(R.layout.expense_history_activity)
 
         receiptDatabaseHelper = ReceiptDatabaseHelper(this)
-        tvEmptyReceipts = findViewById(R.id.tvEmptyReceipts)
+        emptyReceiptsState = findViewById(R.id.emptyReceiptsState)
+        findViewById<Button>(R.id.btnEmptyScanReceipt).setOnClickListener {
+            startActivity(Intent(this, ScanReceiptActivity::class.java))
+        }
 
         receiptAdapter = ReceiptAdapter(emptyList()) { receipt ->
             val intent = Intent(this, ReceiptDetailsActivity::class.java).apply {
@@ -68,10 +71,10 @@ class ExpenseHistoryActivity : AppCompatActivity() {
         receiptAdapter.submitList(receipts)
 
         if (receipts.isEmpty()) {
-            tvEmptyReceipts.visibility = View.VISIBLE
+            emptyReceiptsState.visibility = View.VISIBLE
             rvReceipts.visibility = View.GONE
         } else {
-            tvEmptyReceipts.visibility = View.GONE
+            emptyReceiptsState.visibility = View.GONE
             rvReceipts.visibility = View.VISIBLE
         }
     }

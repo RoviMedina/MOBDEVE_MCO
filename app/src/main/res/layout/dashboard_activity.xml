@@ -28,7 +28,6 @@
             android:textColor="@color/textSecondary"
             android:textSize="16sp" />
 
-        <!-- TODO: Replace these mock values with monthly totals from SQLite. -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,6 +66,26 @@
                     android:text="0 Receipts This Month"
                     android:textColor="@android:color/white"
                     android:textSize="15sp" />
+
+                <ProgressBar
+                    android:id="@+id/progressDashboardBudget"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="18dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressTint="@color/success"
+                    android:progressBackgroundTint="@color/primaryContainer" />
+
+                <TextView
+                    android:id="@+id/tvDashboardBudget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Budget used: 0% of 0.00"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -168,8 +187,6 @@
             android:textColor="@color/textPrimary"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <!-- TODO: Convert recent receipts into a RecyclerView fed by stored receipts. -->
 
         <TextView
             android:id="@+id/tvEmptyRecentReceipts"

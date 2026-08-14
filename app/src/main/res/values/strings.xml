@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MOBDEVE_MCO</string>
+    <string name="app_name">BudgetLens</string>
     <string name="edit_receipt">Edit Receipt</string>
     <string name="delete_receipt">Delete Receipt</string>
     <string name="edit_profile">Edit Profile</string>
