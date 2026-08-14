@@ -21,9 +21,17 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var etPassword: TextInputEditText
     private lateinit var etConfirmPassword: TextInputEditText
 
+    private lateinit var dbHelper: ReceiptDatabaseHelper
+
+    private lateinit var sessionManager: SessionManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.register_activity)
+
+        dbHelper = ReceiptDatabaseHelper(this)
+        sessionManager = SessionManager(this)
 
         tilName = findViewById(R.id.tilRegisterName)
         tilEmail = findViewById(R.id.tilRegisterEmail)
@@ -86,6 +94,19 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
+        val userId = dbHelper.insertUser(name, email, password)
+
+        if (userId == -1L) {
+            Toast.makeText(
+                this,
+                "Failed to create account.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        sessionManager.saveUserId(userId)
+
         val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
         prefs.edit()
             .putString("name", name)
@@ -95,10 +116,15 @@ class RegisterActivity : AppCompatActivity() {
             .putBoolean("is_guest", false)
             .apply()
 
-        Toast.makeText(this, "Account created.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            this,
+            "Account created.",
+            Toast.LENGTH_SHORT
+        ).show()
 
         val intent = Intent(this, DashboardActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        intent.flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
     }
 

@@ -17,7 +17,8 @@ class ReceiptDatabaseHelper(context: Context) :
             CREATE TABLE $TABLE_USERS (
                 $COL_USER_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COL_USER_NAME TEXT NOT NULL,
-                $COL_USER_EMAIL TEXT NOT NULL
+                $COL_USER_EMAIL TEXT NOT NULL UNIQUE,
+                $COL_USER_PASSWORD TEXT NOT NULL
             )
             """.trimIndent()
         )
@@ -49,28 +50,43 @@ class ReceiptDatabaseHelper(context: Context) :
         seedCategories(db)
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    override fun onUpgrade(
+        db: SQLiteDatabase,
+        oldVersion: Int,
+        newVersion: Int
+    ) {
         if (oldVersion < 3) {
             removeSeedReceipts(db)
             removeSeedUser(db)
         }
+
         if (oldVersion < 4) {
-            db.execSQL("ALTER TABLE $TABLE_RECEIPTS ADD COLUMN $COL_OWNER_KEY TEXT NOT NULL DEFAULT '$OWNER_LEGACY'")
+            db.execSQL(
+                "ALTER TABLE $TABLE_RECEIPTS ADD COLUMN $COL_OWNER_KEY TEXT NOT NULL DEFAULT '$OWNER_LEGACY'"
+            )
+        }
+
+        if (oldVersion < 5) {
+            db.execSQL(
+                "ALTER TABLE $TABLE_USERS ADD COLUMN $COL_USER_PASSWORD TEXT NOT NULL DEFAULT ''"
+            )
         }
     }
 
     fun ensureDefaultUser(sessionManager: SessionManager) {
         if (sessionManager.getUserId() == -1L) {
-            val userId = insertUser("Guest User", "Guest session")
+            val userId = insertUser("Guest User", "Guest session", "fHk30f`!s=5j")
             sessionManager.saveUserId(userId)
         }
     }
 
-    fun insertUser(name: String, email: String): Long {
+    fun insertUser(name: String, email: String, password: String): Long {
         val values = ContentValues().apply {
             put(COL_USER_NAME, name)
             put(COL_USER_EMAIL, email)
+            put(COL_USER_PASSWORD, password)
         }
+
         return writableDatabase.insert(TABLE_USERS, null, values)
     }
 
@@ -93,6 +109,36 @@ class ReceiptDatabaseHelper(context: Context) :
                 )
             }
         }
+        return null
+    }
+
+    fun loginUser(email: String, password: String): User? {
+        val db = readableDatabase
+
+        db.query(
+            TABLE_USERS,
+            null,
+            "$COL_USER_EMAIL = ? AND $COL_USER_PASSWORD = ?",
+            arrayOf(email, password),
+            null,
+            null,
+            null
+        ).use { cursor ->
+            if (cursor.moveToFirst()) {
+                return User(
+                    id = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(COL_USER_ID)
+                    ),
+                    name = cursor.getString(
+                        cursor.getColumnIndexOrThrow(COL_USER_NAME)
+                    ),
+                    email = cursor.getString(
+                        cursor.getColumnIndexOrThrow(COL_USER_EMAIL)
+                    )
+                )
+            }
+        }
+
         return null
     }
 
@@ -458,12 +504,13 @@ class ReceiptDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "receipt_tracker.db"
-        private const val DATABASE_VERSION = 4
+        private const val DATABASE_VERSION = 5
 
         private const val TABLE_USERS = "users"
         private const val COL_USER_ID = "user_id"
         private const val COL_USER_NAME = "name"
         private const val COL_USER_EMAIL = "email"
+        private const val COL_USER_PASSWORD = "password"
 
         private const val TABLE_RECEIPTS = "receipts"
         private const val COL_ID = "id"

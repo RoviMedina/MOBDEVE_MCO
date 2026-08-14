@@ -43,28 +43,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loginAccount() {
-        val email = findViewById<TextInputEditText>(R.id.etEmail).text.toString().trim()
-        val password = findViewById<TextInputEditText>(R.id.etPassword).text.toString()
+        val email = findViewById<TextInputEditText>(R.id.etEmail)
+            .text.toString().trim()
+
+        val password = findViewById<TextInputEditText>(R.id.etPassword)
+            .text.toString()
 
         if (!isLoginInputValid(email, password)) {
             return
         }
 
-        val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
-        val savedEmail = prefs.getString("email", null)
-        val savedPassword = prefs.getString("password", null)
+        val dbHelper = ReceiptDatabaseHelper(this)
+        val sessionManager = SessionManager(this)
 
-        if (savedEmail.isNullOrBlank() || savedPassword.isNullOrBlank()) {
-            Toast.makeText(this, "No account found. Please register first.", Toast.LENGTH_SHORT).show()
+        val user = dbHelper.loginUser(email, password)
+
+        if (user == null) {
+            Toast.makeText(
+                this,
+                "Invalid email or password.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
-        if (email != savedEmail || password != savedPassword) {
-            Toast.makeText(this, "Invalid email or password.", Toast.LENGTH_SHORT).show()
-            return
-        }
+        sessionManager.saveUserId(user.id)
 
-        prefs.edit()
+        getSharedPreferences("account", Context.MODE_PRIVATE)
+            .edit()
+            .putString("name", user.name)
+            .putString("email", user.email)
             .putBoolean("is_logged_in", true)
             .putBoolean("is_guest", false)
             .apply()
@@ -102,10 +110,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun hasActiveSession(): Boolean {
         val prefs = getSharedPreferences("account", Context.MODE_PRIVATE)
+
         val isLoggedIn = prefs.getBoolean("is_logged_in", false)
-        val savedEmail = prefs.getString("email", null)
         val isGuest = prefs.getBoolean("is_guest", false)
-        return isLoggedIn && (isGuest || !savedEmail.isNullOrBlank())
+        val savedEmail = prefs.getString("email", null)
+
+        if (!isLoggedIn) {
+            return false
+        }
+
+        if (isGuest) {
+            return true
+        }
+
+        val userId = SessionManager(this).getUserId()
+
+        return userId != -1L && !savedEmail.isNullOrBlank()
     }
 
     private fun openDashboard() {
