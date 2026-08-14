@@ -36,38 +36,94 @@ class BudgetSettingsActivity : AppCompatActivity() {
         loadCategoryBudgetFields(layoutCategoryBudgets, tvBudgetExamples, prefs)
 
         btnSaveBudget.setOnClickListener {
+            tilMonthlyBudget.error = null
+
             val enteredBudgetText = etMonthlyBudget.text.toString().trim()
-            val enteredBudget = enteredBudgetText.takeIf { it.isNotBlank() }?.toDoubleOrNull()
+            val enteredBudget = enteredBudgetText
+                .takeIf { it.isNotBlank() }
+                ?.toDoubleOrNull()
+
             if (enteredBudgetText.isNotBlank() && enteredBudget == null) {
                 tilMonthlyBudget.error = "Enter a valid amount"
                 return@setOnClickListener
             }
 
-            val editor = prefs.edit()
-            var categoryBudgetTotal = 0.0
-            categoryBudgetInputs.forEach { (categoryId, input) ->
+            val monthlyBudgetInPhp = enteredBudget?.let {
+                MoneyFormatter.toBaseAmount(this, it)
+            } ?: 0.0
+
+            val categoryAmounts = mutableMapOf<Long, Double>()
+
+            // Validate every category first
+            for ((categoryId, input) in categoryBudgetInputs) {
                 val amountText = input.text.toString().trim()
-                val amount = amountText.takeIf { it.isNotBlank() }?.toDoubleOrNull()
+                val amount = amountText
+                    .takeIf { it.isNotBlank() }
+                    ?.toDoubleOrNull()
+
                 if (amountText.isNotBlank() && amount == null) {
-                    Toast.makeText(this, "Enter valid category budget amounts.", Toast.LENGTH_SHORT).show()
+                    input.error = "Enter a valid amount"
+                    Toast.makeText(
+                        this,
+                        "Enter valid category budget amounts.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
 
-                if (amount == null) {
-                    editor.remove(categoryBudgetKey(categoryId))
-                } else {
+                input.error = null
+
+                if (amount != null) {
                     val amountInPhp = MoneyFormatter.toBaseAmount(this, amount)
-                    categoryBudgetTotal += amountInPhp
-                    editor.putString(categoryBudgetKey(categoryId), amountInPhp.toString())
+                    categoryAmounts[categoryId] = amountInPhp
                 }
             }
 
-            val monthlyBudgetInPhp = enteredBudget?.let { MoneyFormatter.toBaseAmount(this, it) } ?: categoryBudgetTotal
+            // Calculate total of all category budgets
+            val categoryBudgetTotal = categoryAmounts.values.sum()
+
+            // Total category budgets cannot exceed monthly budget
+            if (monthlyBudgetInPhp > 0.0 &&
+                categoryBudgetTotal > monthlyBudgetInPhp
+            ) {
+                val remaining = monthlyBudgetInPhp - categoryBudgetTotal
+
+                Toast.makeText(
+                    this,
+                    "Category budgets total ${MoneyFormatter.format(this, categoryBudgetTotal)}, " +
+                            "which exceeds the monthly budget of ${MoneyFormatter.format(this, monthlyBudgetInPhp)}.",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                return@setOnClickListener
+            }
+
+            val editor = prefs.edit()
+
+            // Save category budgets
+            categoryBudgetInputs.forEach { (categoryId, input) ->
+                val amountInPhp = categoryAmounts[categoryId]
+
+                if (amountInPhp == null) {
+                    editor.remove(categoryBudgetKey(categoryId))
+                } else {
+                    editor.putString(
+                        categoryBudgetKey(categoryId),
+                        amountInPhp.toString()
+                    )
+                }
+            }
+
+            // Save monthly budget
             if (monthlyBudgetInPhp > 0.0) {
-                editor.putString(monthlyBudgetKey(), monthlyBudgetInPhp.toString())
+                editor.putString(
+                    monthlyBudgetKey(),
+                    monthlyBudgetInPhp.toString()
+                )
             } else {
                 editor.remove(monthlyBudgetKey())
             }
+
             editor.apply()
 
             Toast.makeText(
